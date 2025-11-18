@@ -7,18 +7,14 @@
 
 <link rel="stylesheet" href="styles.css">
 
-<!-- Tailwind -->
+<!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-black text-slate-100 min-h-screen p-6">
-
 <div id="root" class="w-full max-w-4xl mx-auto"></div>
 
-<!-- IMPORTANT FIX -->
-<script type="module">
-  import "./app.js";
-</script>
-
+<!-- IMPORTANT: type="module" to import app.js -->
+<script type="module" src="./app.js"></script>
 </body>
 </html>
