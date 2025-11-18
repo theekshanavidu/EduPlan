@@ -1,42 +1,42 @@
 :root{
-  --primary-cyan: #00f0ef;
-  --primary-purple: #8b5cf6;
-  --card-bg: rgba(255,255,255,0.05);
-  --text-light: #f0f0f0;
-  --text-dark: #111;
-  --bg-light: #fdfdfd;
-  --bg-dark: #0a0d10;
+  --primary-cyan:#00f0ef;
+  --primary-purple:#8b5cf6;
+  --card-bg:rgba(255,255,255,0.05);
+  --text-light:#f0f0f0;
+  --text-dark:#111;
+  --bg-light:#fdfdfd;
+  --bg-dark:#0a0d10;
 }
 
 body{
-  font-family:'Inter', sans-serif;
-  transition: background-color 0.3s, color 0.3s;
+  font-family:'Inter',sans-serif;
+  transition: background-color 0.3s,color 0.3s;
 }
 
 body.light{
-  background-color: var(--bg-light);
-  color: var(--text-dark);
+  background-color:var(--bg-light);
+  color:var(--text-dark);
 }
 
 body.dark{
-  background-color: var(--bg-dark);
-  color: var(--text-light);
+  background-color:var(--bg-dark);
+  color:var(--text-light);
 }
 
 .app-frame{
   margin:auto;
   background: linear-gradient(180deg, rgba(8,10,12,0.95), rgba(3,6,9,0.98));
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 8px 40px rgba(0,0,0,.6);
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 8px 40px rgba(0,0,0,.6);
   border:1px solid rgba(139,92,246,.2);
   overflow:auto;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s,color 0.3s;
 }
 
 body.light .app-frame{
-  background: var(--bg-light);
-  color: var(--text-dark);
+  background:var(--bg-light);
+  color:var(--text-dark);
   border:1px solid #aaa;
 }
 
@@ -52,11 +52,11 @@ body.light .app-frame{
 .brand{
   font-size:24px;
   font-weight:800;
-  color: var(--primary-cyan);
+  color:var(--primary-cyan);
 }
 
 body.light .brand{
-  color: #444;
+  color:#444;
 }
 
 .neon-btn{
@@ -71,8 +71,8 @@ body.light .brand{
 }
 
 body.light .neon-btn{
-  background: #888;
-  color: #fff;
+  background:#888;
+  color:#fff;
 }
 
 .neon-btn:hover{
@@ -92,7 +92,7 @@ body.light .neon-btn{
 }
 
 body.light .form-field label{
-  color: #222;
+  color:#222;
 }
 
 .form-field input{
@@ -116,7 +116,7 @@ body.light .form-field input{
 }
 
 body.light .small-link a{
-  color: #333;
+  color:#333;
 }
 
 .dashboard{
@@ -130,7 +130,7 @@ body.light .small-link a{
   border-radius:10px;
   background: var(--card-bg);
   border:1px solid rgba(255,255,255,.1);
-  transition: background 0.3s, border 0.3s, color 0.3s;
+  transition: background 0.3s,border 0.3s,color 0.3s;
 }
 
 body.light .card{
