@@ -1,0 +1,82 @@
+/* ---------------- BODY ---------------- */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    transition: all 0.3s;
+}
+.dark-mode { background-color: #111; color: #eee; }
+.light-mode { background-color: #eee; color: #111; }
+
+/* ---------------- CONTAINER ---------------- */
+.login-container, .app-frame {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 15px;
+}
+.login-container { text-align: center; }
+.app-frame { background: rgba(0,0,0,0.2); padding:20px; }
+
+/* ---------------- TOPBAR ---------------- */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.topbar .brand { font-size: 24px; font-weight: bold; }
+.flex { display: flex; align-items:center; }
+.flex.gap-2 > * { margin-right: 10px; }
+
+/* ---------------- BUTTON ---------------- */
+.neon-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #8b5cf6;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.2s;
+}
+.neon-btn:hover {
+    box-shadow: 0 0 10px #00f0ef, 0 0 20px #8b5cf6;
+}
+
+/* ---------------- FORM ---------------- */
+form { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+input.form-field {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+input.form-field:disabled { background-color: #ccc; color: #555; }
+label { font-weight: bold; margin-bottom: 5px; }
+
+/* ---------------- DASHBOARD ---------------- */
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-x: auto;
+}
+
+/* ---------------- USER ITEM ---------------- */
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.1);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* ---------------- CHART ---------------- */
+canvas { max-width: 100%; background: rgba(0,0,0,0.05); border-radius: 10px; padding: 10px; }
+
+/* ---------------- SMALL LINK ---------------- */
+.small-link a { color: #00f0ef; text-decoration: none; }
+.small-link a:hover { text-decoration: underline; }
