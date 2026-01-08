@@ -866,15 +866,85 @@ async function renderAdmin() {
   };
 }
 
-async function renderAdminUserDetails(uid){
+async function renderAdminUserDetails(uid) {
   const detailsContainer = document.getElementById('admin-user-details');
-  const userSnap = await getDoc(doc(db,'users',uid));
+  
+  // User ගේ දත්ත ලබා ගැනීම
+  const userSnap = await getDoc(doc(db, 'users', uid));
+  if (!userSnap.exists()) return;
   const u = userSnap.data();
-  const logsSnap = await getDocs(query(collection(db,'studyLogs'), where('userId','==',uid)));
-  const logs = logsSnap.docs.map(d=>d.data());
-  detailsContainer.innerHTML = `<div class="bg-slate-800 p-4 rounded space-y-3"><h3>${u.firstName} ${u.lastName}</h3><p>${u.email}</p><canvas id="admin-weekly-chart"></canvas><canvas id="admin-monthly-chart"></canvas></div>`;
-  // Chart rendering code (simplified for space)
-  renderCharts(uid); 
+
+  // Admin Panel එකේ details පෙන්වන HTML එක
+  detailsContainer.innerHTML = `
+    <div class="bg-slate-800 p-6 rounded-xl space-y-4 mt-6 border border-indigo-500">
+      <h3 class="text-2xl font-bold text-indigo-400">${u.firstName} ${u.lastName} ගේ විස්තර</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <p><strong>Email:</strong> ${u.email}</p>
+        <p><strong>School:</strong> ${u.school}</p>
+        <p><strong>Phone:</strong> ${u.phone}</p>
+        <p><strong>Exam Year:</strong> ${u.examYear}</p>
+      </div>
+      
+      <div class="space-y-6 mt-4">
+        <div>
+          <h4 class="text-lg font-semibold mb-2 text-white">Weekly Study Progress</h4>
+          <canvas id="admin-weekly-chart" class="bg-slate-900 rounded p-2"></canvas>
+        </div>
+        <div>
+          <h4 class="text-lg font-semibold mb-2 text-white">Monthly Study Progress</h4>
+          <canvas id="admin-monthly-chart" class="bg-slate-900 rounded p-2"></canvas>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Charts පෙන්වීම සඳහා දත්ත ලබා ගැනීම
+  const snap = await getDocs(query(collection(db, 'studyLogs'), where('userId', '==', uid)));
+  const data = snap.docs.map(d => d.data());
+  const weekly = [], monthly = {};
+  const today = new Date();
+
+  // සතියේ දත්ත සකස් කිරීම
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(today.getDate() - i);
+    const ds = d.toISOString().slice(0, 10);
+    weekly.push(data.filter(x => x.date === ds).reduce((a, b) => a + b.hours, 0));
+  }
+
+  // මාසික දත්ත සකස් කිරීම
+  data.forEach(x => {
+    const month = x.date.slice(0, 7);
+    monthly[month] = (monthly[month] || 0) + x.hours;
+  });
+
+  const months = Object.keys(monthly).sort();
+  const monthValues = months.map(m => monthly[m]);
+
+  // Weekly Chart එක ඇඳීම
+  const ctxW = document.getElementById('admin-weekly-chart').getContext('2d');
+  new Chart(ctxW, {
+    type: 'line',
+    data: {
+      labels: Array.from({ length: 7 }, (_, i) => { 
+        const d = new Date(); d.setDate(today.getDate() - 6 + i); 
+        return d.toISOString().slice(5, 10); 
+      }),
+      datasets: [{ label: 'Hours', data: weekly, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.3)', fill: true }]
+    },
+    options: { plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' }, beginAtZero: true } } }
+  });
+
+  // Monthly Chart එක ඇඳීම
+  const ctxM = document.getElementById('admin-monthly-chart').getContext('2d');
+  new Chart(ctxM, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{ label: 'Monthly Hours', data: monthValues, backgroundColor: '#22d3ee' }]
+    },
+    options: { plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' }, beginAtZero: true } } }
+  });
 }
 
 async function deleteAdminUser(uid,name){
