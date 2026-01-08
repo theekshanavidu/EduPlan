@@ -259,7 +259,7 @@ function renderLogin(){
 
     <div class="flex justify-between items-center mt-2">
       <button type="submit" class="liquid-btn">Login</button>
-      <button type="button" id="forgot-pass" class="text-sm text-slate-300">Forgot?</button>
+      <button type="button" onclick="handleForgotPassword()" class="text-sm text-slate-300 hover:text-white underline">Forgot?</button>
     </div>
 
     <div id="login-error" class="text-red-400"></div>
@@ -390,6 +390,30 @@ async function saveProfile() {
   alert("Profile saved!");
   navigateTo('/home');
 }
+
+// ---------- Forget ----------
+async function handleForgotPassword() {
+  const email = prompt("කරුණාකර ඔබගේ Email ලිපිනය ඇතුළත් කරන්න:");
+  if (!email) return;
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    alert("Password reset කිරීමට අවශ්‍ය ලින්ක් එක ඔබගේ Email ලිපිනයට එවනු ලැබුවා. කරුණාකර ඔබගේ Inbox/Spam පරීක්ෂා කරන්න.");
+  } catch (err) {
+    let errorMsg = "දෝෂයක් සිදු විය: ";
+    if (err.code === 'auth/user-not-found') {
+      errorMsg += "මෙම Email ලිපිනයෙන් ගිණුමක් සොයාගත නොහැක.";
+    } else if (err.code === 'auth/invalid-email') {
+      errorMsg += "Email ලිපිනය නිවැරදි නැත.";
+    } else {
+      errorMsg += err.message;
+    }
+    alert(errorMsg);
+  }
+}
+
+// මෙය window object එකට සම්බන්ධ කරමු එවිට HTML එකෙන් access කළ හැක
+window.handleForgotPassword = handleForgotPassword;
 
 // ---------- Home ----------
 async function renderHome(){
