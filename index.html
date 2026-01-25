@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduPlan Pro | Professional Academic Suite</title>
+    <title>EduPlan Pro | Professional Scheduler</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,9 +28,14 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
+        /* Grid පෙනුම ලස්සන කිරීමට Style */
+        .fc-v-event { border-radius: 12px !important; border: none !important; padding: 6px !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; cursor: pointer; }
+        .fc-event-title { font-weight: 800 !important; font-size: 0.8rem !important; line-height: 1.2; }
+        .fc-event-time { font-weight: 600 !important; font-size: 0.7rem !important; opacity: 0.8; margin-bottom: 2px; }
+        .fc-timegrid-slot { height: 3.5em !important; border-bottom: 1px solid rgba(0,0,0,0.02) !important; }
+        .dark .fc-timegrid-slot { border-bottom: 1px solid rgba(255,255,255,0.02) !important; }
         .sidebar-item:hover, .sub-filter:hover { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
         .active-filter { background: #6366f1 !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3); }
-        .fc-event { border: none !important; padding: 2px 4px; border-radius: 4px; font-weight: 600; font-size: 0.85em; cursor: pointer; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         @media (max-width: 1024px) { #sidebar { display: none; position: fixed; z-index: 60; } #sidebar.open { display: flex; } }
@@ -60,7 +65,7 @@
 
     <aside id="sidebar" class="w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex-col sticky top-0 h-screen">
         <div class="p-8 flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center"><i class="fas fa-layer-group text-white"></i></div>
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none"><i class="fas fa-layer-group text-white"></i></div>
             <span class="text-xl font-black tracking-tight uppercase">EduPlan</span>
         </div>
         
@@ -69,15 +74,14 @@
             <div onclick="filterBySubject(null)" class="sub-filter active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-4 transition-all" id="all-filter">
                 <i class="fas fa-th-large"></i> All Subjects
             </div>
-            <div id="sidebar-subject-list" class="space-y-1">
-                </div>
+            <div id="sidebar-subject-list" class="space-y-1"></div>
         </nav>
 
         <div class="p-8 border-t border-slate-100 dark:border-slate-800 space-y-2">
-            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold">
+            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold transition">
                 <i id="theme-icon" class="fas fa-moon"></i> Appearance
             </button>
-            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold hover:bg-red-50 rounded-2xl transition">
+            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
@@ -89,52 +93,52 @@
                 <button onclick="document.getElementById('sidebar').classList.toggle('open')" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800">
                     <i class="fas fa-bars"></i>
                 </button>
-                <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight" id="main-title">Academic Calendar</h2>
+                <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight" id="main-title">Focus Schedule</h2>
             </div>
-            <div id="date-display" class="hidden md:block text-slate-400 font-bold"></div>
+            <div id="date-display" class="hidden md:block text-slate-400 font-bold text-sm"></div>
         </header>
 
         <div class="p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-12 gap-8">
             <div class="xl:col-span-4 space-y-8">
-                <section class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[35px] shadow-sm border border-slate-100 dark:border-slate-800">
+                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] shadow-sm border border-slate-100 dark:border-slate-800">
                     <h3 class="text-lg font-bold mb-4">Add Subject</h3>
                     <div class="flex gap-2">
-                        <input type="text" id="newSubName" placeholder="e.g. Maths" class="flex-grow p-3 rounded-xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                        <input type="text" id="newSubName" placeholder="Subject Name" class="flex-grow p-3 rounded-xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         <input type="color" id="newSubColor" class="w-12 h-12 rounded-xl border-none cursor-pointer bg-transparent" value="#6366f1">
                         <button onclick="addSubject()" class="bg-indigo-600 text-white px-4 rounded-xl hover:bg-indigo-700 transition"><i class="fas fa-plus"></i></button>
                     </div>
                 </section>
 
-                <section class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[35px] shadow-sm border border-slate-100 dark:border-slate-800">
-                    <h3 class="text-lg font-bold mb-4">New Session</h3>
+                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] shadow-sm border border-slate-100 dark:border-slate-800">
+                    <h3 class="text-lg font-bold mb-4">Plan a Session</h3>
                     <div class="space-y-3">
                         <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold">
                             <option value="">Select Subject</option>
                         </select>
-                        <input type="text" id="taskTitle" placeholder="What is the topic?" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                        <input type="text" id="taskTitle" placeholder="What will you learn?" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         <div class="grid grid-cols-2 gap-2">
                             <input type="time" id="startTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                             <input type="time" id="endTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         </div>
                         <input type="hidden" id="taskColor">
-                        <button onclick="saveTask()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition">Save to Schedule</button>
+                        <button onclick="saveTask()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition shadow-xl shadow-indigo-100 dark:shadow-none">Add to Timetable</button>
                     </div>
                 </section>
 
-                <section class="bg-indigo-600 dark:bg-indigo-950 p-6 lg:p-8 rounded-[35px] text-white shadow-2xl min-h-[400px]">
+                <section class="bg-indigo-600 dark:bg-indigo-950 p-8 rounded-[40px] text-white shadow-2xl min-h-[400px]">
                     <div class="flex justify-between items-center mb-6">
                         <h3 id="agenda-date" class="text-xl font-bold tracking-tight">Focus Agenda</h3>
-                        <i class="fas fa-rocket opacity-40 text-2xl"></i>
+                        <i class="fas fa-calendar-check opacity-40 text-2xl"></i>
                     </div>
                     <div id="daily-tasks-list" class="space-y-4">
-                        <div class="text-center py-20 opacity-40 text-sm italic font-medium">Select a date on the calendar</div>
+                        <div class="text-center py-20 opacity-40 text-sm italic font-medium">Click any time-slot or date to view detailed agenda</div>
                     </div>
                 </section>
             </div>
 
             <div class="xl:col-span-8">
-                <div class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[40px] shadow-sm border border-slate-100 dark:border-slate-800">
+                <div class="bg-white dark:bg-surface-dark p-4 lg:p-6 rounded-[40px] shadow-sm border border-slate-100 dark:border-slate-800">
                     <div id="calendar"></div>
                 </div>
             </div>
@@ -146,6 +150,7 @@
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Your Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyALIII2FHy65LTvi4AaC6ulXCd6CCXQ2UM",
             authDomain: "time-planning-4ef59.firebaseapp.com",
@@ -160,7 +165,6 @@
         const db = getFirestore(app);
         let calendar, allTasks = [], subjects = {}, currentFilter = null;
 
-        // --- UI LOGIC ---
         window.toggleDarkMode = () => {
             const isDark = document.documentElement.classList.toggle('dark');
             document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
@@ -180,12 +184,11 @@
 
         window.handleAuth = (t) => {
             const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            t === 'signup' ? createUserWithEmailAndPassword(auth, e, p) : signInWithEmailAndPassword(auth, e, p);
+            t === 'signup' ? createUserWithEmailAndPassword(auth, e, p).catch(alert) : signInWithEmailAndPassword(auth, e, p).catch(alert);
         };
         window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
         window.logout = () => signOut(auth);
 
-        // --- SUBJECT MANAGEMENT & FILTERING ---
         window.addSubject = async () => {
             const name = document.getElementById('newSubName').value.trim();
             const color = document.getElementById('newSubColor').value;
@@ -218,10 +221,10 @@
             document.querySelectorAll('.sub-filter, #all-filter').forEach(el => el.classList.remove('active-filter'));
             if(name) {
                 document.getElementById(`filter-${name}`).classList.add('active-filter');
-                document.getElementById('main-title').innerText = `${name} Sessions`;
+                document.getElementById('main-title').innerText = `${name} Workspace`;
             } else {
                 document.getElementById('all-filter').classList.add('active-filter');
-                document.getElementById('main-title').innerText = "Academic Calendar";
+                document.getElementById('main-title').innerText = "Focus Schedule";
             }
             renderToCalendar();
         };
@@ -231,15 +234,27 @@
             document.getElementById('taskColor').value = subjects[sub] || "#6366f1";
         };
 
-        // --- CALENDAR & TASKS ---
         function initCalendar() {
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                initialView: 'dayGridMonth',
+                initialView: 'timeGridWeek', // පින්තූරයේ ඇති Grid එක
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                slotMinTime: '06:00:00', // උදේ 6 සිට
+                slotMaxTime: '23:00:00', // රෑ 11 දක්වා
+                allDaySlot: false,
+                nowIndicator: true,
+                expandRows: true,
+                height: 'auto',
                 dateClick: info => showDailyTasks(info.dateStr),
                 eventClick: info => showDailyTasks(info.event.startStr.split('T')[0]),
-                height: 'auto',
-                eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' }
+                eventContent: function(arg) {
+                    let container = document.createElement('div');
+                    container.className = 'flex flex-col h-full overflow-hidden';
+                    container.innerHTML = `
+                        <span class="text-[9px] font-black opacity-60 uppercase">${arg.timeText}</span>
+                        <span class="text-[11px] font-extrabold leading-tight break-words">${arg.event.title}</span>
+                    `;
+                    return { domNodes: [container] };
+                }
             });
             calendar.render();
         }
@@ -251,7 +266,7 @@
             const start = document.getElementById('startTime').value;
             const end = document.getElementById('endTime').value;
             const color = document.getElementById('taskColor').value;
-            if(!title || !date || !sub) return alert("Fill Subject, Title & Date");
+            if(!title || !date || !sub) return alert("Please fill all details!");
 
             await addDoc(collection(db, "tasks"), {
                 uid: auth.currentUser.uid,
@@ -273,8 +288,11 @@
         function renderToCalendar() {
             let filtered = currentFilter ? allTasks.filter(t => t.subName === currentFilter) : allTasks;
             calendar.removeAllEvents();
-            calendar.addEventSource(filtered.map(t => ({...t, title: t.completed ? `✓ ${t.title}` : t.title})));
-            
+            calendar.addEventSource(filtered.map(t => ({
+                ...t, 
+                title: t.completed ? `✓ ${t.title}` : t.title,
+                textColor: '#ffffff'
+            })));
             const activeDate = document.getElementById('agenda-date').innerText;
             if(activeDate !== "Focus Agenda") showDailyTasks(activeDate);
         }
@@ -284,20 +302,22 @@
             const list = document.getElementById('daily-tasks-list');
             const dayTasks = allTasks.filter(t => t.date === dateStr).sort((a,b) => a.start.localeCompare(b.start));
             
-            list.innerHTML = dayTasks.length ? "" : "<p class='text-indigo-200 text-center py-20 opacity-50 italic'>Clear day! No sessions.</p>";
+            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-20 opacity-40 text-sm italic font-medium'>No activities for this day</div>";
             dayTasks.forEach(t => {
                 const div = document.createElement('div');
-                div.className = `p-5 rounded-[25px] flex items-center justify-between border-l-[6px] transition-all duration-300 ${t.completed ? 'bg-indigo-800/40 opacity-60 scale-95' : 'bg-white text-slate-900 shadow-xl'}`;
+                div.className = `p-5 rounded-[25px] flex items-center justify-between border-l-[6px] transition-all duration-500 ${t.completed ? 'bg-indigo-900/40 opacity-50 scale-95 shadow-none' : 'bg-white text-slate-900 shadow-xl'}`;
                 div.style.borderColor = t.backgroundColor;
                 div.innerHTML = `
                     <div class="flex items-center gap-4">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-6 h-6 rounded-full accent-green-500 cursor-pointer">
+                        <div class="relative flex items-center justify-center">
+                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-6 h-6 rounded-full accent-green-500 cursor-pointer">
+                        </div>
                         <div>
                             <p class="font-extrabold text-sm ${t.completed ? 'line-through opacity-50' : ''}">${t.title}</p>
                             <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
                         </div>
                     </div>
-                    <button onclick="deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 transition"><i class="fas fa-trash-alt text-xs"></i></button>`;
+                    <button onclick="deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 p-2"><i class="fas fa-trash-alt text-xs"></i></button>`;
                 list.appendChild(div);
             });
         };
@@ -309,7 +329,7 @@
             await updateDoc(doc(db, "tasks", id), { completed: !status });
         };
 
-        window.deleteTask = async (id) => { if(confirm("Delete session?")) await deleteDoc(doc(db, "tasks", id)); };
+        window.deleteTask = async (id) => { if(confirm("Delete this session from your schedule?")) await deleteDoc(doc(db, "tasks", id)); };
         document.getElementById('date-display').innerText = new Date().toDateString();
     </script>
 </body>
