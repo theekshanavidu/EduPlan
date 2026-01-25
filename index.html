@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduPlan Pro | Mobile Optimized</title>
-    
+    <title>EduPlan Pro</title>
+    <link rel="icon" type="image/png" href="https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?semt=ais_hybrid&w=740&q=80">
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -32,18 +33,23 @@
         .fc-event-title { font-weight: 700 !important; font-size: 0.7rem !important; }
         .fc-timegrid-slot { height: 2.2em !important; }
         
-        /* Mobile Specific UI Optimization */
-        @media (max-width: 768px) {
+        /* Layout Adjustments */
+        @media (max-width: 1024px) {
             #sidebar { 
                 position: fixed; left: -100%; z-index: 1000; 
-                transition: 0.4s ease; height: 100vh; width: 80%;
+                transition: 0.4s ease; height: 100vh; width: 280px;
             }
             #sidebar.open { left: 0; }
             #sidebar-overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 900; backdrop-filter: blur(2px); }
             
-            /* Compact Calendar for Mobile */
+            /* Mobile Stack Order */
+            .mobile-stack { display: flex; flex-direction: column; }
+            .order-subject { order: 1; }
+            .order-plan { order: 2; }
+            .order-calendar { order: 3; }
+            .order-agenda { order: 4; }
+            
             #calendar { height: 500px !important; }
-            .fc-header-toolbar { font-size: 0.75rem !important; flex-direction: column; gap: 5px; }
         }
         #sidebar-overlay { display: none; }
         .active-filter { background: #6366f1 !important; color: white !important; }
@@ -71,7 +77,12 @@
                     <span id="auth-toggle-text">New here?</span>
                     <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-indigo-600 font-bold ml-1">Sign Up</button>
                 </div>
-                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold mt-2 text-sm transition hover:bg-slate-50">
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                    <span class="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase">Or</span>
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                </div>
+                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold text-sm hover:bg-slate-50 transition">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4"> Continue with Google
                 </button>
             </div>
@@ -111,47 +122,48 @@
             <div id="date-display" class="hidden sm:block text-slate-400 font-bold text-xs"></div>
         </header>
 
-        <div class="p-4 lg:p-8 flex flex-col xl:grid xl:grid-cols-12 gap-6">
+        <div class="p-4 lg:p-8 mobile-stack lg:grid lg:grid-cols-12 gap-6">
             
-            <div class="xl:col-span-4 space-y-6 flex flex-col">
-                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-1">
+            <div class="lg:col-span-4 space-y-6 flex flex-col">
+                
+                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-subject lg:order-1">
                     <h3 class="text-md font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-500"></i> Create Subject</h3>
                     <div class="space-y-3">
                         <input type="text" id="newSubName" placeholder="Subject Name" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         <div class="flex items-center justify-between px-2">
-                            <span class="text-xs font-bold text-slate-400">Color:</span>
+                            <span class="text-xs font-bold text-slate-400">Pick Color:</span>
                             <input type="color" id="newSubColor" value="#6366f1" class="w-12 h-10 cursor-pointer bg-transparent border-none">
                         </div>
                         <button onclick="addSubject()" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3 rounded-2xl font-bold text-sm">Save Subject</button>
                     </div>
                 </section>
 
-                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-2">
+                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-plan lg:order-2">
                     <h3 class="text-md font-bold mb-4">Quick Plan</h3>
                     <div class="space-y-3">
                         <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold text-sm">
                             <option value="">Select Subject</option>
                         </select>
-                        <input type="text" id="taskTitle" placeholder="Goal" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                        <input type="text" id="taskTitle" placeholder="What's the goal?" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         <div class="grid grid-cols-2 gap-2">
                             <input type="time" id="startTime" class="p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                             <input type="time" id="endTime" class="p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         </div>
                         <input type="hidden" id="taskColor">
-                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-xl">Add to Grid</button>
+                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-xl">Add to Timeline</button>
                     </div>
+                </section>
+
+                <section class="bg-indigo-600 dark:bg-indigo-950 p-6 lg:p-8 rounded-[40px] text-white shadow-2xl min-h-[300px] order-agenda lg:order-3">
+                    <h3 id="agenda-date" class="text-lg font-bold mb-6 tracking-tight flex items-center gap-2"><i class="fas fa-calendar-check"></i> Target Agenda</h3>
+                    <div id="daily-tasks-list" class="space-y-3"></div>
                 </section>
             </div>
 
-            <div class="xl:col-span-8 flex flex-col gap-6">
-                <section class="bg-white dark:bg-surface-dark p-3 lg:p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden order-3">
+            <div class="lg:col-span-8 flex flex-col order-calendar lg:order-2">
+                <section class="bg-white dark:bg-surface-dark p-2 lg:p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
                     <div id="calendar"></div>
-                </section>
-
-                <section class="bg-indigo-600 dark:bg-indigo-950 p-6 lg:p-8 rounded-[40px] text-white shadow-2xl min-h-[300px] order-4">
-                    <h3 id="agenda-date" class="text-lg font-bold mb-6 tracking-tight flex items-center gap-2"><i class="fas fa-calendar-check"></i> Agenda</h3>
-                    <div id="daily-tasks-list" class="space-y-3"></div>
                 </section>
             </div>
 
@@ -177,7 +189,7 @@
         const db = getFirestore(app);
         let calendar, allTasks = [], subjects = {}, currentFilter = null, selectedDate = new Date().toISOString().split('T')[0], isSignupMode = false;
 
-        // --- AUTH & SIDEBAR ---
+        // AUTH & SIDEBAR
         window.toggleAuthMode = () => {
             isSignupMode = !isSignupMode;
             document.getElementById('auth-title').innerText = isSignupMode ? "Create Account" : "EduPlan Pro";
@@ -194,7 +206,7 @@
         window.openSidebar = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); };
         window.closeSidebar = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); };
 
-        // --- SUBJECTS ---
+        // SUBJECTS
         window.addSubject = async () => {
             const name = document.getElementById('newSubName').value.trim();
             const color = document.getElementById('newSubColor').value;
@@ -214,12 +226,12 @@
                     const sub = doc.data();
                     subjects[sub.name] = sub.color;
                     select.innerHTML += `<option value="${sub.name}">${sub.name}</option>`;
-                    sidebar.innerHTML += `<div onclick="filterBySubject('${sub.name}'); closeSidebar()" class="p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 text-sm" id="filter-${sub.name}"><span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}</div>`;
+                    sidebar.innerHTML += `<div onclick="filterBySubject('${sub.name}'); closeSidebar()" class="p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 text-sm hover:bg-slate-50" id="filter-${sub.name}"><span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}</div>`;
                 });
             });
         }
 
-        // --- CORE LOGIC ---
+        // CORE LOGIC
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('auth-page').classList.add('hidden');
@@ -246,7 +258,7 @@
                 eventClick: info => { selectedDate = info.event.startStr.split('T')[0]; updateAgenda(); },
                 eventContent: arg => {
                     let c = document.createElement('div');
-                    c.innerHTML = `<div class="text-[7px] font-bold opacity-70">${arg.timeText}</div><div class="text-[8px] font-bold truncate">${arg.event.title}</div>`;
+                    c.innerHTML = `<div class="text-[7px] font-bold opacity-70 leading-none">${arg.timeText}</div><div class="text-[8px] font-bold truncate">${arg.event.title}</div>`;
                     return { domNodes: [c] };
                 }
             });
@@ -257,7 +269,7 @@
             const title = document.getElementById('taskTitle').value, sub = document.getElementById('taskSubject').value,
                   date = document.getElementById('taskDate').value, start = document.getElementById('startTime').value,
                   end = document.getElementById('endTime').value, color = document.getElementById('taskColor').value;
-            if(!title || !date || !sub) return alert("Check fields");
+            if(!title || !date || !sub) return alert("Fill all fields");
             await addDoc(collection(db, "tasks"), { uid: auth.currentUser.uid, subName: sub, title: `${sub}: ${title}`, date, start: `${date}T${start}`, end: `${date}T${end}`, backgroundColor: color, completed: false });
             document.getElementById('taskTitle').value = "";
         };
@@ -282,18 +294,18 @@
             let dayTasks = allTasks.filter(t => t.date === selectedDate);
             if(currentFilter) dayTasks = dayTasks.filter(t => t.subName === currentFilter);
             dayTasks.sort((a,b) => a.start.localeCompare(b.start));
-            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-5 opacity-40 text-xs'>Empty</div>";
+            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-5 opacity-40 text-xs italic'>No goals for this day</div>";
             dayTasks.forEach(t => {
                 const div = document.createElement('div');
                 div.className = `p-4 rounded-[22px] flex items-center justify-between border-l-[5px] ${t.completed ? 'bg-indigo-900/40 opacity-50' : 'bg-white text-slate-900 shadow-lg'}`;
                 div.style.borderColor = t.backgroundColor;
-                div.innerHTML = `<div class="flex items-center gap-3"><input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-5 h-5 accent-green-500"><div><p class="font-bold text-xs ${t.completed ? 'line-through opacity-40' : ''}">${t.title}</p><p class="text-[9px] font-black text-indigo-500">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p></div></div><button onclick="deleteTask('${t.id}')" class="text-slate-300 p-1"><i class="fas fa-trash-alt text-[10px]"></i></button>`;
+                div.innerHTML = `<div class="flex items-center gap-3"><input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-5 h-5 accent-green-500 cursor-pointer"><div><p class="font-bold text-xs ${t.completed ? 'line-through opacity-40' : ''}">${t.title}</p><p class="text-[9px] font-black text-indigo-500">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p></div></div><button onclick="deleteTask('${t.id}')" class="text-slate-300 p-1 hover:text-red-500 transition"><i class="fas fa-trash-alt text-[10px]"></i></button>`;
                 list.appendChild(div);
             });
         }
 
         window.toggleComplete = async (id, status) => { if(!status) confetti({ particleCount: 100, spread: 50, origin: { y: 0.8 } }); await updateDoc(doc(db, "tasks", id), { completed: !status }); };
-        window.deleteTask = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "tasks", id)); };
+        window.deleteTask = async (id) => { if(confirm("Delete this session?")) await deleteDoc(doc(db, "tasks", id)); };
         window.toggleDarkMode = () => { const isDark = document.documentElement.classList.toggle('dark'); document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon'; };
         window.filterBySubject = (name) => { currentFilter = name; document.querySelectorAll('.sub-filter, #all-filter').forEach(el => el.classList.remove('active-filter')); if(name) document.getElementById(`filter-${name}`).classList.add('active-filter'); else document.getElementById('all-filter').classList.add('active-filter'); renderView(); };
         window.applySubjectColor = () => { const sub = document.getElementById('taskSubject').value; document.getElementById('taskColor').value = subjects[sub] || "#6366f1"; };
