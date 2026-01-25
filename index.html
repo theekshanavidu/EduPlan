@@ -338,4 +338,13 @@
         window.applySubjectColor = () => { const sub = document.getElementById('taskSubject').value; document.getElementById('taskColor').value = subjects[sub] || "#6366f1"; };
     </script>
 </body>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/EduPlan/sw.js')
+        .then(reg => console.log('Service Worker Registered'))
+        .catch(err => console.log('Service Worker Error', err));
+    });
+  }
+</script>
 </html>
