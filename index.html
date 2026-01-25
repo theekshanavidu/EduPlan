@@ -2,9 +2,14 @@
 <html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>EduPlan Pro</title>
-    <link rel="icon" type="image/png" href="https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?semt=ais_hybrid&w=740&q=80">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" type="image/png" href="https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=740">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -27,12 +32,11 @@
     </script>
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
         .fc-v-event { border-radius: 8px !important; border: none !important; padding: 4px !important; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .fc-event-title { font-weight: 700 !important; font-size: 0.75rem !important; }
-        .fc-timegrid-slot { height: 3em !important; border-bottom: 1px solid rgba(0,0,0,0.05) !important; }
+        .fc-timegrid-slot { height: 3.5em !important; border-bottom: 1px solid rgba(0,0,0,0.03) !important; }
         
-        /* Professional Mobile Enhancements */
         @media (max-width: 1024px) {
             #sidebar { 
                 position: fixed; left: -105%; z-index: 1000; 
@@ -42,22 +46,19 @@
             }
             #sidebar.open { left: 0; }
             #sidebar-overlay.show { display: block; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 900; backdrop-filter: blur(4px); }
-            
             .mobile-stack { display: flex; flex-direction: column; gap: 1.5rem; }
             .order-subject { order: 1; }
             .order-plan { order: 2; }
             .order-calendar { order: 3; }
             .order-agenda { order: 4; }
-            
-            #calendar { height: 550px !important; border-radius: 24px; overflow: hidden; }
-            .fc-header-toolbar { padding: 10px !important; flex-wrap: wrap; gap: 8px; }
-            
-            input, select, button { font-size: 16px !important; } /* Prevents iOS auto-zoom */
+            #calendar { height: 550px !important; border-radius: 24px; overflow: hidden; background: white; }
+            input, select, button { font-size: 16px !important; }
         }
         
-        .active-filter { background: #6366f1 !important; color: white !important; transform: scale(1.02); }
-        .sub-filter { transition: 0.2s ease; }
+        .active-filter { background: #6366f1 !important; color: white !important; }
         #sidebar-overlay { display: none; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-bg-light dark:bg-bg-dark text-slate-800 dark:text-slate-100 min-h-screen flex overflow-x-hidden">
@@ -71,24 +72,24 @@
                     <i class="fas fa-graduation-cap text-white text-3xl"></i>
                 </div>
                 <h1 id="auth-title" class="text-3xl font-extrabold tracking-tight">EduPlan Pro</h1>
-                <p id="auth-subtitle" class="text-slate-400 mt-2 text-sm">Elevate your study routine</p>
+                <p class="text-slate-400 mt-2 text-sm">Elevate your study routine</p>
             </div>
             
             <div class="space-y-4">
                 <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 ring-indigo-500 transition text-sm">
                 <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 ring-indigo-500 transition text-sm">
-                <button id="auth-btn" onclick="handleAuth()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition duration-300">Login</button>
-                <div class="text-center text-xs font-medium">
+                <button id="auth-btn" onclick="handleAuth()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition">Login</button>
+                <div class="text-center text-xs">
                     <span id="auth-toggle-text">New to EduPlan?</span>
-                    <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-indigo-600 font-bold ml-1 hover:underline">Create Account</button>
+                    <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-indigo-600 font-bold ml-1">Create Account</button>
                 </div>
                 <div class="relative flex py-3 items-center">
                     <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
-                    <span class="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">Secure Access</span>
+                    <span class="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">Or</span>
                     <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
                 </div>
-                <button onclick="loginWithGoogle()" class="w-full border border-slate-200 dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4"> Continue with Google
+                <button onclick="loginWithGoogle()" class="w-full border border-slate-200 dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold text-sm hover:bg-slate-50 transition">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4"> Google Login
                 </button>
             </div>
         </div>
@@ -98,83 +99,67 @@
         <div class="p-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-white"></i></div>
-                <span class="text-xl font-black tracking-tight">EduPlan</span>
+                <span class="text-xl font-black">EduPlan</span>
             </div>
-            <button onclick="closeSidebar()" class="lg:hidden w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400"><i class="fas fa-times"></i></button>
+            <button onclick="closeSidebar()" class="lg:hidden text-slate-400"><i class="fas fa-times"></i></button>
         </div>
         
         <nav class="px-6 space-y-1 overflow-y-auto flex-grow">
-            <div onclick="filterBySubject(null); closeSidebar()" class="sub-filter active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-6 group" id="all-filter">
-                <i class="fas fa-th-large group-hover:rotate-12 transition"></i> All Workspace
+            <div onclick="filterBySubject(null); closeSidebar()" class="sub-filter active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-6" id="all-filter">
+                <i class="fas fa-th-large"></i> All Subjects
             </div>
-            <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Your Subjects</p>
             <div id="sidebar-subject-list" class="space-y-1"></div>
         </nav>
 
         <div class="p-6 border-t border-slate-100 dark:border-slate-800 space-y-2">
-            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold text-sm hover:bg-indigo-50 transition"><i id="theme-icon" class="fas fa-moon"></i> Appearance</button>
-            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold text-sm hover:bg-red-50 rounded-2xl transition"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold text-sm"><i id="theme-icon" class="fas fa-moon"></i> Appearance</button>
+            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold text-sm"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
         </div>
     </aside>
 
     <main id="app-content" class="hidden flex-grow flex flex-col h-screen overflow-y-auto">
         <header class="p-5 lg:p-8 flex justify-between items-center sticky top-0 z-40 bg-bg-light/80 dark:bg-bg-dark/80 backdrop-blur-xl border-b border-transparent">
             <div class="flex items-center gap-4">
-                <button onclick="openSidebar()" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                <button onclick="openSidebar()" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-800">
                     <i class="fas fa-bars-staggered text-indigo-600"></i>
                 </button>
-                <div>
-                    <h2 class="text-xl lg:text-2xl font-extrabold tracking-tight" id="main-title">Academic Grid</h2>
-                    <p id="date-display" class="text-slate-400 font-bold text-[10px] uppercase tracking-tighter"></p>
-                </div>
+                <h2 class="text-xl lg:text-2xl font-extrabold tracking-tight" id="main-title">Workspace</h2>
             </div>
-            <div class="flex items-center gap-2">
-                 <div class="hidden md:flex w-10 h-10 rounded-full bg-indigo-100 items-center justify-center"><i class="fas fa-user text-indigo-600"></i></div>
-            </div>
+            <div id="date-display" class="hidden sm:block text-slate-400 font-bold text-xs"></div>
         </header>
 
         <div class="p-4 lg:p-8 mobile-stack lg:grid lg:grid-cols-12 gap-8">
-            
             <div class="lg:col-span-4 space-y-8 flex flex-col">
-                
-                <section class="bg-white dark:bg-surface-dark p-7 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-subject lg:order-1 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-10 -mt-10"></div>
+                <section class="bg-white dark:bg-surface-dark p-7 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-subject lg:order-1">
                     <h3 class="text-md font-bold mb-5 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-500"></i> New Subject</h3>
                     <div class="space-y-4">
-                        <input type="text" id="newSubName" placeholder="Subject Name (e.g. Physics)" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm focus:border-indigo-400 transition">
-                        <div class="flex items-center justify-between px-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl">
-                            <span class="text-xs font-bold text-slate-500">Theme Color</span>
+                        <input type="text" id="newSubName" placeholder="Subject Name" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                        <div class="flex items-center justify-between px-2">
+                            <span class="text-xs font-bold text-slate-400">Color:</span>
                             <input type="color" id="newSubColor" value="#6366f1" class="w-10 h-10 cursor-pointer bg-transparent border-none">
                         </div>
-                        <button onclick="addSubject()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition">Add Subject</button>
+                        <button onclick="addSubject()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition">Save Subject</button>
                     </div>
                 </section>
 
                 <section class="bg-white dark:bg-surface-dark p-7 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-plan lg:order-2">
                     <h3 class="text-md font-bold mb-5 flex items-center gap-2"><i class="fas fa-bolt text-amber-500"></i> Quick Plan</h3>
                     <div class="space-y-4">
-                        <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold text-sm appearance-none cursor-pointer"></select>
-                        <input type="text" id="taskTitle" placeholder="Task Title" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                        <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold text-sm"></select>
+                        <input type="text" id="taskTitle" placeholder="What's the goal?" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">From</label>
-                                <input type="time" id="startTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">To</label>
-                                <input type="time" id="endTime" class="p-4 w-full rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
-                            </div>
+                            <input type="time" id="startTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                            <input type="time" id="endTime" class="p-4 w-full rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         </div>
                         <input type="hidden" id="taskColor">
-                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-100 active:scale-95 transition">Insert Task</button>
+                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition">Add to Timeline</button>
                     </div>
                 </section>
 
-                <section class="bg-indigo-600 dark:bg-indigo-950 p-7 lg:p-8 rounded-[40px] text-white shadow-2xl min-h-[400px] order-agenda lg:order-3 relative overflow-hidden">
-                    <div class="absolute bottom-0 left-0 w-full h-1 bg-white/10"></div>
-                    <div class="flex justify-between items-center mb-8">
-                        <h3 id="agenda-date-label" class="text-xl font-bold tracking-tight">Timeline</h3>
+                <section class="bg-indigo-600 dark:bg-indigo-950 p-7 lg:p-8 rounded-[40px] text-white shadow-2xl min-h-[400px] order-agenda lg:order-3">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="agenda-date-label" class="text-xl font-bold tracking-tight">Agenda</h3>
                         <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest" id="selected-day-badge">Today</div>
                     </div>
                     <div id="daily-tasks-list" class="space-y-4"></div>
@@ -182,11 +167,10 @@
             </div>
 
             <div class="lg:col-span-8 flex flex-col order-calendar lg:order-2">
-                <section class="bg-white dark:bg-surface-dark p-3 lg:p-6 rounded-[40px] border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
+                <section class="bg-white dark:bg-surface-dark p-2 lg:p-6 rounded-[40px] border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
                     <div id="calendar"></div>
                 </section>
             </div>
-
         </div>
     </main>
 
@@ -208,18 +192,12 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        let calendar;
-        let allTasks = [];
-        let subjects = {};
-        let currentFilter = null;
-        let selectedDate = new Date().toISOString().split('T')[0];
-        let isSignupMode = false;
+        let calendar, allTasks = [], subjects = {}, currentFilter = null, selectedDate = new Date().toISOString().split('T')[0], isSignupMode = false;
 
-        // AUTH & UI HELPERS
         window.toggleAuthMode = () => {
             isSignupMode = !isSignupMode;
-            document.getElementById('auth-title').innerText = isSignupMode ? "Join EduPlan" : "EduPlan Pro";
-            document.getElementById('auth-btn').innerText = isSignupMode ? "Create Account" : "Login";
+            document.getElementById('auth-title').innerText = isSignupMode ? "Create Account" : "EduPlan Pro";
+            document.getElementById('auth-btn').innerText = isSignupMode ? "Sign Up" : "Login";
             document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Sign Up";
         };
 
@@ -235,47 +213,35 @@
         window.openSidebar = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); };
         window.closeSidebar = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); };
 
-        // SUBJECTS
         window.addSubject = async () => {
             const name = document.getElementById('newSubName').value.trim();
             const color = document.getElementById('newSubColor').value;
             if(!name) return;
             await setDoc(doc(db, "users", auth.currentUser.uid, "subjects", name), { name, color });
             document.getElementById('newSubName').value = "";
-            confetti({ particleCount: 40, spread: 70, origin: { y: 0.8 }, colors: [color, '#ffffff'] });
+            confetti({ particleCount: 40, spread: 70, origin: { y: 0.8 } });
         };
 
         function syncSubjects(uid) {
             onSnapshot(collection(db, "users", uid, "subjects"), (snap) => {
-                const select = document.getElementById('taskSubject');
-                const sidebar = document.getElementById('sidebar-subject-list');
-                select.innerHTML = '<option value="">Select Subject</option>';
+                const select = document.getElementById('taskSubject'), sidebar = document.getElementById('sidebar-subject-list');
+                select.innerHTML = '<option value="">Subject</option>';
                 sidebar.innerHTML = '';
                 snap.forEach(doc => {
                     const sub = doc.data();
                     subjects[sub.name] = sub.color;
                     select.innerHTML += `<option value="${sub.name}">${sub.name}</option>`;
-                    sidebar.innerHTML += `
-                        <div onclick="filterBySubject('${sub.name}'); closeSidebar()" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 text-sm hover:bg-slate-50 dark:hover:bg-slate-800" id="filter-${sub.name}">
-                            <span class="w-3 h-3 rounded-full ring-4 ring-slate-100 dark:ring-slate-700" style="background:${sub.color}"></span> 
-                            ${sub.name}
-                        </div>`;
+                    sidebar.innerHTML += `<div onclick="filterBySubject('${sub.name}'); closeSidebar()" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 text-sm" id="filter-${sub.name}"><span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}</div>`;
                 });
             });
         }
 
-        // FIREBASE OBSERVER
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
-                setupDefaults(); 
-                initCalendar(); 
-                syncSubjects(user.uid); 
-                loadTasks(user.uid);
-            } else { 
-                document.getElementById('auth-page').classList.remove('hidden'); 
-            }
+                setupDefaults(); initCalendar(); syncSubjects(user.uid); loadTasks(user.uid);
+            } else { document.getElementById('auth-page').classList.remove('hidden'); }
         });
 
         function setupDefaults() {
@@ -287,33 +253,26 @@
         }
 
         function initCalendar() {
-            const calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' },
-                slotMinTime: '06:00:00', 
-                slotMaxTime: '23:00:00',
-                allDaySlot: false,
-                height: 'auto',
-                expandRows: true,
-                nowIndicator: true,
-                selectable: true,
-                editable: false,
+                slotMinTime: '06:00:00', slotMaxTime: '23:00:00',
+                allDaySlot: false, height: 'auto', nowIndicator: true, selectable: true,
+                
+                // Fixed Date Handling: Any click on calendar sets the context correctly
                 dateClick: info => { 
-                    selectedDate = info.dateStr; 
+                    selectedDate = info.dateStr.split('T')[0]; 
                     updateAgenda(); 
-                    // Highlight effect for better UX
-                    document.getElementById('selected-day-badge').innerText = new Date(selectedDate).toLocaleDateString('en-US', {weekday: 'short'});
                 },
                 eventClick: info => { 
                     selectedDate = info.event.startStr.split('T')[0]; 
                     updateAgenda(); 
                 },
                 eventContent: arg => {
-                    let container = document.createElement('div');
-                    container.className = "p-1 overflow-hidden";
-                    container.innerHTML = `<div class="text-[9px] font-black uppercase opacity-60">${arg.timeText}</div><div class="text-[10px] font-bold truncate">${arg.event.title}</div>`;
-                    return { domNodes: [container] };
+                    let c = document.createElement('div');
+                    c.className = "p-1";
+                    c.innerHTML = `<div class="text-[9px] font-black opacity-60 uppercase">${arg.timeText}</div><div class="text-[10px] font-bold truncate">${arg.event.title}</div>`;
+                    return { domNodes: [c] };
                 }
             });
             calendar.render();
@@ -323,18 +282,8 @@
             const title = document.getElementById('taskTitle').value, sub = document.getElementById('taskSubject').value,
                   date = document.getElementById('taskDate').value, start = document.getElementById('startTime').value,
                   end = document.getElementById('endTime').value, color = document.getElementById('taskColor').value;
-            if(!title || !date || !sub) return alert("Please complete all fields");
-            
-            await addDoc(collection(db, "tasks"), { 
-                uid: auth.currentUser.uid, 
-                subName: sub, 
-                title: title, 
-                date, 
-                start: `${date}T${start}`, 
-                end: `${date}T${end}`, 
-                backgroundColor: color, 
-                completed: false 
-            });
+            if(!title || !date || !sub) return alert("Fill all fields");
+            await addDoc(collection(db, "tasks"), { uid: auth.currentUser.uid, subName: sub, title, date, start: `${date}T${start}`, end: `${date}T${end}`, backgroundColor: color, completed: false });
             document.getElementById('taskTitle').value = "";
         };
 
@@ -349,90 +298,44 @@
             let filtered = currentFilter ? allTasks.filter(t => t.subName === currentFilter) : allTasks;
             calendar.removeAllEvents();
             calendar.addEventSource(filtered.map(t => ({
-                id: t.id,
-                title: t.subName + ": " + t.title,
-                start: t.start,
-                end: t.end,
-                backgroundColor: t.backgroundColor,
-                textColor: '#fff'
+                id: t.id, title: t.subName + ": " + t.title, start: t.start, end: t.end, backgroundColor: t.backgroundColor, textColor: '#fff'
             })));
             updateAgenda();
         }
 
-        // THE KEY FUNCTION: Filters by selectedDate AND currentFilter
         function updateAgenda() {
             const list = document.getElementById('daily-tasks-list');
-            const label = document.getElementById('agenda-date-label');
-            
             const displayDate = new Date(selectedDate);
-            label.innerText = displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            document.getElementById('agenda-date-label').innerText = displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            document.getElementById('selected-day-badge').innerText = displayDate.toLocaleDateString('en-US', { weekday: 'short' });
             
-            // Core Logic: Filter by Date AND Filter by Subject (if active)
             let dayTasks = allTasks.filter(t => t.date === selectedDate);
             if(currentFilter) dayTasks = dayTasks.filter(t => t.subName === currentFilter);
-            
             dayTasks.sort((a,b) => a.start.localeCompare(b.start));
             
-            list.innerHTML = dayTasks.length ? "" : `
-                <div class='flex flex-col items-center justify-center py-12 opacity-30 text-center'>
-                    <i class="fas fa-calendar-day text-4xl mb-2"></i>
-                    <p class='text-xs font-bold uppercase tracking-widest'>No plans recorded</p>
-                </div>`;
-            
+            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-10 opacity-30 text-xs italic uppercase tracking-widest'>No Plans Scheduled</div>";
             dayTasks.forEach(t => {
                 const div = document.createElement('div');
-                div.className = `group p-4 rounded-[28px] flex items-center justify-between border-l-[6px] transition-all duration-300 ${t.completed ? 'bg-indigo-900/30 opacity-60 scale-95' : 'bg-white text-slate-900 shadow-xl'}`;
+                div.className = `p-4 rounded-[28px] flex items-center justify-between border-l-[6px] transition-all ${t.completed ? 'bg-indigo-900/30 opacity-60 scale-95' : 'bg-white text-slate-900 shadow-xl'}`;
                 div.style.borderColor = t.backgroundColor;
                 div.innerHTML = `
                     <div class="flex items-center gap-4">
-                        <div class="relative flex items-center justify-center">
-                            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" 
-                                class="w-6 h-6 rounded-full border-2 border-slate-200 checked:bg-green-500 checked:border-green-500 appearance-none cursor-pointer transition-all">
-                            ${t.completed ? '<i class="fas fa-check absolute text-[10px] text-white pointer-events-none"></i>' : ''}
-                        </div>
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-5 h-5 accent-green-500 cursor-pointer">
                         <div>
                             <p class="font-bold text-sm ${t.completed ? 'line-through opacity-40' : ''}">${t.subName}: ${t.title}</p>
-                            <p class="text-[10px] font-black text-indigo-500 uppercase tracking-tighter">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
+                            <p class="text-[10px] font-black text-indigo-500">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
                         </div>
                     </div>
-                    <button onclick="deleteTask('${t.id}')" class="text-slate-200 hover:text-red-500 p-2 transition">
-                        <i class="fas fa-trash-alt text-xs"></i>
-                    </button>`;
+                    <button onclick="deleteTask('${t.id}')" class="text-slate-200 hover:text-red-500 transition"><i class="fas fa-trash-alt text-xs"></i></button>`;
                 list.appendChild(div);
             });
         }
 
-        window.toggleComplete = async (id, status) => { 
-            if(!status) confetti({ particleCount: 150, spread: 60, origin: { y: 0.7 } }); 
-            await updateDoc(doc(db, "tasks", id), { completed: !status }); 
-        };
-        
-        window.deleteTask = async (id) => { 
-            if(confirm("Discard this plan?")) await deleteDoc(doc(db, "tasks", id)); 
-        };
-        
-        window.toggleDarkMode = () => { 
-            const isDark = document.documentElement.classList.toggle('dark'); 
-            document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon'; 
-        };
-        
-        window.filterBySubject = (name) => { 
-            currentFilter = name; 
-            document.querySelectorAll('.sub-filter, #all-filter').forEach(el => el.classList.remove('active-filter')); 
-            if(name) {
-                document.getElementById(`filter-${name}`).classList.add('active-filter');
-                document.getElementById('main-title').innerText = name;
-            } else {
-                document.getElementById('all-filter').classList.add('active-filter');
-                document.getElementById('main-title').innerText = "Workspace";
-            }
-            renderView(); 
-        };
-        
-        window.applySubjectColor = () => { 
-            const sub = document.getElementById('taskSubject').value; 
-            document.getElementById('taskColor').value = subjects[sub] || "#6366f1"; 
-        };
+        window.toggleComplete = async (id, status) => { if(!status) confetti({ particleCount: 100, spread: 60, origin: { y: 0.7 } }); await updateDoc(doc(db, "tasks", id), { completed: !status }); };
+        window.deleteTask = async (id) => { if(confirm("Delete this?")) await deleteDoc(doc(db, "tasks", id)); };
+        window.toggleDarkMode = () => { const isDark = document.documentElement.classList.toggle('dark'); document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon'; };
+        window.filterBySubject = (name) => { currentFilter = name; document.querySelectorAll('.sub-filter, #all-filter').forEach(el => el.classList.remove('active-filter')); if(name) { document.getElementById(`filter-${name}`).classList.add('active-filter'); document.getElementById('main-title').innerText = name; } else { document.getElementById('all-filter').classList.add('active-filter'); document.getElementById('main-title').innerText = "Workspace"; } renderView(); };
+        window.applySubjectColor = () => { const sub = document.getElementById('taskSubject').value; document.getElementById('taskColor').value = subjects[sub] || "#6366f1"; };
     </script>
 </body>
 </html>
