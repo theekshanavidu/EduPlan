@@ -1,10 +1,22 @@
-// මෙය සරල Service Worker එකකි
-self.addEventListener('install', (e) => {
-  console.log('Service Worker: Installed');
+const CACHE_NAME = 'eduplan-v1';
+const assets = [
+  '/EduPlan/',
+  '/EduPlan/index.html',
+  '/EduPlan/manifest.json'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(assets);
+    })
+  );
 });
 
-self.addEventListener('fetch', (e) => {
-  // මෙහි දැනට කිසිවක් කිරීමට අවශ්‍ය නැත, 
-  // නමුත් මෙය තිබීම App එක install කිරීමට අත්‍යවශ්‍ය වේ.
-  e.respondWith(fetch(e.request));
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
+  );
 });
