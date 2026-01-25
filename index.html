@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduPlan Pro | Full Subject Control</title>
+    <title>EduPlan Pro | Mobile Optimized</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,14 +28,22 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
-        .fc-v-event { border-radius: 8px !important; border: none !important; padding: 2px 4px !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; cursor: pointer; }
-        .fc-event-title { font-weight: 800 !important; font-size: 0.75rem !important; }
-        .fc-timegrid-slot { height: 2.5em !important; }
+        .fc-v-event { border-radius: 6px !important; border: none !important; padding: 2px !important; }
+        .fc-event-title { font-weight: 700 !important; font-size: 0.7rem !important; }
+        .fc-timegrid-slot { height: 2.2em !important; }
         
-        @media (max-width: 1024px) {
-            #sidebar { position: fixed; left: -100%; z-index: 1000; transition: 0.4s ease; height: 100vh; width: 280px; }
+        /* Mobile Specific UI Optimization */
+        @media (max-width: 768px) {
+            #sidebar { 
+                position: fixed; left: -100%; z-index: 1000; 
+                transition: 0.4s ease; height: 100vh; width: 80%;
+            }
             #sidebar.open { left: 0; }
-            #sidebar-overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 900; backdrop-filter: blur(2px); }
+            #sidebar-overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 900; backdrop-filter: blur(2px); }
+            
+            /* Compact Calendar for Mobile */
+            #calendar { height: 500px !important; }
+            .fc-header-toolbar { font-size: 0.75rem !important; flex-direction: column; gap: 5px; }
         }
         #sidebar-overlay { display: none; }
         .active-filter { background: #6366f1 !important; color: white !important; }
@@ -48,33 +56,33 @@
     <div id="auth-page" class="fixed inset-0 z-[1100] bg-bg-light dark:bg-bg-dark flex items-center justify-center p-4">
         <div class="bg-white dark:bg-surface-dark w-full max-w-md p-8 rounded-[40px] shadow-2xl border border-slate-100 dark:border-slate-800">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
                     <i class="fas fa-graduation-cap text-white text-2xl"></i>
                 </div>
-                <h1 id="auth-title" class="text-3xl font-extrabold tracking-tight">EduPlan Pro</h1>
-                <p id="auth-subtitle" class="text-slate-400 mt-2 text-sm">Please login or sign up</p>
+                <h1 id="auth-title" class="text-2xl font-extrabold tracking-tight">EduPlan Pro</h1>
+                <p id="auth-subtitle" class="text-slate-400 mt-2 text-xs">Manage your academic life</p>
             </div>
             
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                 <button id="auth-btn" onclick="handleAuth()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg">Login</button>
-                <div class="text-center text-sm">
+                <div class="text-center text-xs">
                     <span id="auth-toggle-text">New here?</span>
                     <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-indigo-600 font-bold ml-1">Sign Up</button>
                 </div>
-                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold mt-4">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-5 h-5"> Continue with Google
+                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold mt-2 text-sm transition hover:bg-slate-50">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4"> Continue with Google
                 </button>
             </div>
         </div>
     </div>
 
-    <aside id="sidebar" class="bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+    <aside id="sidebar" class="w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
         <div class="p-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-white"></i></div>
-                <span class="text-xl font-black uppercase">EduPlan</span>
+                <span class="text-xl font-black">EduPlan</span>
             </div>
             <button onclick="closeSidebar()" class="lg:hidden text-slate-400"><i class="fas fa-times"></i></button>
         </div>
@@ -87,65 +95,66 @@
         </nav>
 
         <div class="p-8 border-t border-slate-100 dark:border-slate-800 space-y-2">
-            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold"><i id="theme-icon" class="fas fa-moon"></i> Theme</button>
-            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold text-sm"><i id="theme-icon" class="fas fa-moon"></i> Theme</button>
+            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </aside>
 
     <main id="app-content" class="hidden flex-grow flex flex-col h-screen overflow-y-auto">
-        <header class="p-6 lg:p-8 flex justify-between items-center sticky top-0 z-10 bg-bg-light/80 dark:bg-bg-dark/80 backdrop-blur-md">
+        <header class="p-5 lg:p-8 flex justify-between items-center sticky top-0 z-10 bg-bg-light/80 dark:bg-bg-dark/80 backdrop-blur-md">
             <div class="flex items-center gap-4">
                 <button onclick="openSidebar()" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800">
                     <i class="fas fa-bars-staggered"></i>
                 </button>
-                <h2 class="text-xl lg:text-3xl font-extrabold" id="main-title">My Schedule</h2>
+                <h2 class="text-lg lg:text-2xl font-extrabold" id="main-title">Workspace</h2>
             </div>
-            <div id="date-display" class="hidden sm:block text-slate-400 font-bold text-sm"></div>
+            <div id="date-display" class="hidden sm:block text-slate-400 font-bold text-xs"></div>
         </header>
 
-        <div class="p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-12 gap-6">
-            <div class="xl:col-span-4 space-y-6 order-2 xl:order-1">
-                
-                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-tags text-indigo-500"></i> Create Subject</h3>
-                    <div class="flex flex-col gap-3">
-                        <input type="text" id="newSubName" placeholder="Subject Name (e.g. Maths)" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
-                        <div class="flex items-center gap-3">
-                            <label class="text-xs font-bold text-slate-400 uppercase">Pick Color:</label>
-                            <input type="color" id="newSubColor" value="#6366f1" class="w-full h-10 rounded-xl cursor-pointer border-none bg-transparent">
+        <div class="p-4 lg:p-8 flex flex-col xl:grid xl:grid-cols-12 gap-6">
+            
+            <div class="xl:col-span-4 space-y-6 flex flex-col">
+                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-1">
+                    <h3 class="text-md font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-500"></i> Create Subject</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="newSubName" placeholder="Subject Name" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                        <div class="flex items-center justify-between px-2">
+                            <span class="text-xs font-bold text-slate-400">Color:</span>
+                            <input type="color" id="newSubColor" value="#6366f1" class="w-12 h-10 cursor-pointer bg-transparent border-none">
                         </div>
-                        <button onclick="addSubject()" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition">Save Subject</button>
+                        <button onclick="addSubject()" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3 rounded-2xl font-bold text-sm">Save Subject</button>
                     </div>
                 </section>
 
-                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm">
-                    <h3 class="text-lg font-bold mb-4">Quick Plan</h3>
+                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-2">
+                    <h3 class="text-md font-bold mb-4">Quick Plan</h3>
                     <div class="space-y-3">
                         <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold text-sm">
                             <option value="">Select Subject</option>
                         </select>
-                        <input type="text" id="taskTitle" placeholder="What's the goal?" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                        <input type="text" id="taskTitle" placeholder="Goal" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         <div class="grid grid-cols-2 gap-2">
                             <input type="time" id="startTime" class="p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                             <input type="time" id="endTime" class="p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         </div>
                         <input type="hidden" id="taskColor">
-                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-xl hover:bg-indigo-700">Add to Grid</button>
+                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-xl">Add to Grid</button>
                     </div>
                 </section>
+            </div>
 
-                <section class="bg-indigo-600 dark:bg-indigo-950 p-6 lg:p-8 rounded-[40px] text-white shadow-2xl min-h-[300px]">
-                    <h3 id="agenda-date" class="text-xl font-bold mb-6 tracking-tight">Agenda</h3>
+            <div class="xl:col-span-8 flex flex-col gap-6">
+                <section class="bg-white dark:bg-surface-dark p-3 lg:p-6 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden order-3">
+                    <div id="calendar"></div>
+                </section>
+
+                <section class="bg-indigo-600 dark:bg-indigo-950 p-6 lg:p-8 rounded-[40px] text-white shadow-2xl min-h-[300px] order-4">
+                    <h3 id="agenda-date" class="text-lg font-bold mb-6 tracking-tight flex items-center gap-2"><i class="fas fa-calendar-check"></i> Agenda</h3>
                     <div id="daily-tasks-list" class="space-y-3"></div>
                 </section>
             </div>
 
-            <div class="xl:col-span-8 order-1 xl:order-2">
-                <div class="bg-white dark:bg-surface-dark p-2 lg:p-6 rounded-[40px] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                    <div id="calendar"></div>
-                </div>
-            </div>
         </div>
     </main>
 
@@ -168,10 +177,10 @@
         const db = getFirestore(app);
         let calendar, allTasks = [], subjects = {}, currentFilter = null, selectedDate = new Date().toISOString().split('T')[0], isSignupMode = false;
 
-        // Auth & Sidebar Handlers
+        // --- AUTH & SIDEBAR ---
         window.toggleAuthMode = () => {
             isSignupMode = !isSignupMode;
-            document.getElementById('auth-title').innerText = isSignupMode ? "Create Account" : "Welcome Back";
+            document.getElementById('auth-title').innerText = isSignupMode ? "Create Account" : "EduPlan Pro";
             document.getElementById('auth-btn').innerText = isSignupMode ? "Sign Up" : "Login";
             document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Sign Up";
         };
@@ -185,14 +194,14 @@
         window.openSidebar = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); };
         window.closeSidebar = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); };
 
-        // Subject Logic
+        // --- SUBJECTS ---
         window.addSubject = async () => {
             const name = document.getElementById('newSubName').value.trim();
             const color = document.getElementById('newSubColor').value;
-            if(!name) return alert("Enter subject name");
+            if(!name) return;
             await setDoc(doc(db, "users", auth.currentUser.uid, "subjects", name), { name, color });
             document.getElementById('newSubName').value = "";
-            confetti({ particleCount: 50, spread: 30, origin: { y: 0.8 } });
+            confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 } });
         };
 
         function syncSubjects(uid) {
@@ -205,12 +214,12 @@
                     const sub = doc.data();
                     subjects[sub.name] = sub.color;
                     select.innerHTML += `<option value="${sub.name}">${sub.name}</option>`;
-                    sidebar.innerHTML += `<div onclick="filterBySubject('${sub.name}'); closeSidebar()" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500" id="filter-${sub.name}"><span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}</div>`;
+                    sidebar.innerHTML += `<div onclick="filterBySubject('${sub.name}'); closeSidebar()" class="p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 text-sm" id="filter-${sub.name}"><span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}</div>`;
                 });
             });
         }
 
-        // State & Calendar Logic
+        // --- CORE LOGIC ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('auth-page').classList.add('hidden');
@@ -232,12 +241,12 @@
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
                 slotMinTime: '06:00:00', slotMaxTime: '23:00:00',
-                allDaySlot: false, nowIndicator: true, height: 'auto',
+                allDaySlot: false, height: window.innerWidth < 768 ? 500 : 'auto',
                 dateClick: info => { selectedDate = info.dateStr; updateAgenda(); },
                 eventClick: info => { selectedDate = info.event.startStr.split('T')[0]; updateAgenda(); },
                 eventContent: arg => {
                     let c = document.createElement('div');
-                    c.innerHTML = `<div class="text-[7px] font-black opacity-70">${arg.timeText}</div><div class="text-[9px] font-bold truncate">${arg.event.title}</div>`;
+                    c.innerHTML = `<div class="text-[7px] font-bold opacity-70">${arg.timeText}</div><div class="text-[8px] font-bold truncate">${arg.event.title}</div>`;
                     return { domNodes: [c] };
                 }
             });
@@ -248,7 +257,7 @@
             const title = document.getElementById('taskTitle').value, sub = document.getElementById('taskSubject').value,
                   date = document.getElementById('taskDate').value, start = document.getElementById('startTime').value,
                   end = document.getElementById('endTime').value, color = document.getElementById('taskColor').value;
-            if(!title || !date || !sub) return alert("Fill all fields");
+            if(!title || !date || !sub) return alert("Check fields");
             await addDoc(collection(db, "tasks"), { uid: auth.currentUser.uid, subName: sub, title: `${sub}: ${title}`, date, start: `${date}T${start}`, end: `${date}T${end}`, backgroundColor: color, completed: false });
             document.getElementById('taskTitle').value = "";
         };
@@ -269,16 +278,16 @@
 
         function updateAgenda() {
             const list = document.getElementById('daily-tasks-list');
-            document.getElementById('agenda-date').innerText = selectedDate;
+            document.getElementById('agenda-date').innerText = "Agenda: " + selectedDate;
             let dayTasks = allTasks.filter(t => t.date === selectedDate);
             if(currentFilter) dayTasks = dayTasks.filter(t => t.subName === currentFilter);
             dayTasks.sort((a,b) => a.start.localeCompare(b.start));
-            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-10 opacity-40 text-xs'>No sessions</div>";
+            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-5 opacity-40 text-xs'>Empty</div>";
             dayTasks.forEach(t => {
                 const div = document.createElement('div');
                 div.className = `p-4 rounded-[22px] flex items-center justify-between border-l-[5px] ${t.completed ? 'bg-indigo-900/40 opacity-50' : 'bg-white text-slate-900 shadow-lg'}`;
                 div.style.borderColor = t.backgroundColor;
-                div.innerHTML = `<div class="flex items-center gap-3"><input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-5 h-5 rounded-full accent-green-500"><div><p class="font-bold text-xs ${t.completed ? 'line-through opacity-40' : ''}">${t.title}</p><p class="text-[9px] font-black text-indigo-500 uppercase">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p></div></div><button onclick="deleteTask('${t.id}')" class="text-slate-300 p-1"><i class="fas fa-trash-alt text-[10px]"></i></button>`;
+                div.innerHTML = `<div class="flex items-center gap-3"><input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-5 h-5 accent-green-500"><div><p class="font-bold text-xs ${t.completed ? 'line-through opacity-40' : ''}">${t.title}</p><p class="text-[9px] font-black text-indigo-500">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p></div></div><button onclick="deleteTask('${t.id}')" class="text-slate-300 p-1"><i class="fas fa-trash-alt text-[10px]"></i></button>`;
                 list.appendChild(div);
             });
         }
