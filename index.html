@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduPlan Pro | Smart Weekly Grid</title>
+    <title>EduPlan Pro | Mobile Ready</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,114 +28,127 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
-        .fc-v-event { border-radius: 12px !important; border: none !important; padding: 6px !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; cursor: pointer; }
-        .fc-event-title { font-weight: 800 !important; font-size: 0.8rem !important; }
-        .fc-timegrid-slot { height: 1.5em !important; }
-        .sidebar-item:hover, .sub-filter:hover { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
-        .active-filter { background: #6366f1 !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3); }
+        .fc-v-event { border-radius: 8px !important; border: none !important; padding: 2px 4px !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; cursor: pointer; }
+        .fc-event-title { font-weight: 800 !important; font-size: 0.75rem !important; }
+        .fc-timegrid-slot { height: 2.5em !important; }
+        
+        /* Mobile Sidebar Logic */
+        @media (max-width: 1024px) {
+            #sidebar { 
+                position: fixed; left: -100%; z-index: 1000; 
+                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                height: 100vh; box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+            }
+            #sidebar.open { left: 0; }
+            #sidebar-overlay { display: none; }
+            #sidebar-overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 900; backdrop-filter: blur(2px); }
+        }
+
+        .active-filter { background: #6366f1 !important; color: white !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        @media (max-width: 1024px) { #sidebar { display: none; position: fixed; z-index: 60; } #sidebar.open { display: flex; } }
     </style>
 </head>
-<body class="bg-bg-light dark:bg-bg-dark text-slate-800 dark:text-slate-100 min-h-screen flex">
+<body class="bg-bg-light dark:bg-bg-dark text-slate-800 dark:text-slate-100 min-h-screen flex overflow-x-hidden">
 
-    <div id="auth-page" class="fixed inset-0 z-[100] bg-bg-light dark:bg-bg-dark flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-surface-dark w-full max-w-md p-10 rounded-[40px] shadow-2xl border border-slate-100 dark:border-slate-800">
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <div id="auth-page" class="fixed inset-0 z-[1100] bg-bg-light dark:bg-bg-dark flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-surface-dark w-full max-w-md p-8 lg:p-10 rounded-[40px] shadow-2xl border border-slate-100 dark:border-slate-800">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
+                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                     <i class="fas fa-graduation-cap text-white text-2xl"></i>
                 </div>
-                <h1 class="text-3xl font-extrabold tracking-tight">EduPlan Pro</h1>
-                <p class="text-slate-400 mt-2">Professional Academic Planning</p>
+                <h1 id="auth-title" class="text-3xl font-extrabold tracking-tight">Welcome Back</h1>
+                <p id="auth-subtitle" class="text-slate-400 mt-2 text-sm">Please login to your account</p>
             </div>
+            
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                <button onclick="handleAuth('login')" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">Login</button>
-                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-semibold mt-2">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_google_color_128dp.png" class="w-5 h-5"> Google Account
+                <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 ring-indigo-500">
+                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 ring-indigo-500">
+                
+                <button id="auth-btn" onclick="handleAuth()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 dark:shadow-none">Login</button>
+                
+                <div class="text-center text-sm font-medium">
+                    <span id="auth-toggle-text">Don't have an account?</span>
+                    <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-indigo-600 font-bold ml-1">Sign Up</button>
+                </div>
+
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                    <span class="flex-shrink mx-4 text-slate-400 text-xs uppercase font-bold tracking-widest">Or</span>
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                </div>
+
+                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-5 h-5" alt="Google">
+                    <span>Continue with Google</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <aside id="sidebar" class="w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex-col sticky top-0 h-screen">
-        <div class="p-8 flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-white"></i></div>
-            <span class="text-xl font-black tracking-tight uppercase">EduPlan</span>
+    <aside id="sidebar" class="w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+        <div class="p-8 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-white"></i></div>
+                <span class="text-xl font-black tracking-tight uppercase">EduPlan</span>
+            </div>
+            <button onclick="closeSidebar()" class="lg:hidden text-slate-400 text-xl"><i class="fas fa-times"></i></button>
         </div>
         
-        <div class="px-6 mb-4 font-bold text-xs text-slate-400 uppercase tracking-widest">Filters</div>
         <nav class="px-6 space-y-1 overflow-y-auto custom-scrollbar flex-grow">
-            <div onclick="filterBySubject(null)" class="sub-filter active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-4" id="all-filter">
+            <div class="mb-4 font-bold text-xs text-slate-400 uppercase tracking-widest px-4">Workspace</div>
+            <div onclick="filterBySubject(null); closeSidebar()" class="sub-filter active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-4" id="all-filter">
                 <i class="fas fa-th-large"></i> All Subjects
             </div>
             <div id="sidebar-subject-list" class="space-y-1"></div>
         </nav>
 
         <div class="p-8 border-t border-slate-100 dark:border-slate-800 space-y-2">
-            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold transition">
-                <i id="theme-icon" class="fas fa-moon"></i> Theme
-            </button>
-            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
+            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold"><i id="theme-icon" class="fas fa-moon"></i> Appearance</button>
+            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold hover:bg-red-50 dark:hover:bg-red-950/20 rounded-2xl transition"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </aside>
 
     <main id="app-content" class="hidden flex-grow flex flex-col h-screen overflow-y-auto custom-scrollbar">
         <header class="p-6 lg:p-8 flex justify-between items-center sticky top-0 z-10 bg-bg-light/80 dark:bg-bg-dark/80 backdrop-blur-md">
             <div class="flex items-center gap-4">
-                <button onclick="document.getElementById('sidebar').classList.toggle('open')" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-xl border">
-                    <i class="fas fa-bars"></i>
+                <button onclick="openSidebar()" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800">
+                    <i class="fas fa-bars-staggered"></i>
                 </button>
-                <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight" id="main-title">Weekly Grid</h2>
+                <h2 class="text-xl lg:text-3xl font-extrabold tracking-tight" id="main-title">Focus Dashboard</h2>
             </div>
-            <div id="date-display" class="hidden md:block text-slate-400 font-bold"></div>
+            <div id="date-display" class="hidden sm:block text-slate-400 font-bold text-xs lg:text-sm"></div>
         </header>
 
-        <div class="p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-12 gap-8">
-            <div class="xl:col-span-4 space-y-8">
+        <div class="p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+            <div class="xl:col-span-4 space-y-6 order-2 xl:order-1">
                 <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] shadow-sm border border-slate-100 dark:border-slate-800">
-                    <h3 class="text-lg font-bold mb-4">New Subject</h3>
-                    <div class="flex gap-2">
-                        <input type="text" id="newSubName" placeholder="Name" class="flex-grow p-3 rounded-xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                        <input type="color" id="newSubColor" class="w-12 h-12 rounded-xl cursor-pointer bg-transparent" value="#6366f1">
-                        <button onclick="addSubject()" class="bg-indigo-600 text-white px-4 rounded-xl"><i class="fas fa-plus"></i></button>
-                    </div>
-                </section>
-
-                <section class="bg-white dark:bg-surface-dark p-6 rounded-[35px] shadow-sm border border-slate-100 dark:border-slate-800">
-                    <h3 class="text-lg font-bold mb-4">Quick Plan</h3>
+                    <h3 class="text-lg font-bold mb-4">Plan Tomorrow</h3>
                     <div class="space-y-3">
-                        <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold">
+                        <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold text-sm">
                             <option value="">Select Subject</option>
                         </select>
-                        <input type="text" id="taskTitle" placeholder="Topic" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                        <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                        <input type="text" id="taskTitle" placeholder="What's the goal?" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                        <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="time" id="startTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                            <input type="time" id="endTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                            <input type="time" id="startTime" class="p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                            <input type="time" id="endTime" class="p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
                         </div>
                         <input type="hidden" id="taskColor">
-                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-xl">Add to Timeline</button>
+                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-indigo-100 dark:shadow-none hover:bg-indigo-700">Add to Grid</button>
                     </div>
                 </section>
 
-                <section class="bg-indigo-600 dark:bg-indigo-950 p-8 rounded-[40px] text-white shadow-2xl min-h-[400px]">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 id="agenda-date" class="text-xl font-bold tracking-tight">Today</h3>
-                        <i class="fas fa-rocket opacity-40 text-2xl"></i>
-                    </div>
-                    <div id="daily-tasks-list" class="space-y-4">
-                        <div class="text-center py-20 opacity-40 text-sm">Select a date or subject</div>
-                    </div>
+                <section class="bg-indigo-600 dark:bg-indigo-950 p-6 lg:p-8 rounded-[40px] text-white shadow-2xl min-h-[300px]">
+                    <h3 id="agenda-date" class="text-xl font-bold mb-6 tracking-tight flex items-center gap-2"><i class="fas fa-bullseye opacity-50"></i> Target Agenda</h3>
+                    <div id="daily-tasks-list" class="space-y-3"></div>
                 </section>
             </div>
 
-            <div class="xl:col-span-8">
-                <div class="bg-white dark:bg-surface-dark p-4 lg:p-6 rounded-[40px] shadow-sm border border-slate-100 dark:border-slate-800">
+            <div class="xl:col-span-8 order-1 xl:order-2">
+                <div class="bg-white dark:bg-surface-dark p-2 lg:p-6 rounded-[40px] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
                     <div id="calendar"></div>
                 </div>
             </div>
@@ -159,77 +172,78 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let calendar, allTasks = [], subjects = {}, currentFilter = null, selectedDate = null;
+        let calendar, allTasks = [], subjects = {}, currentFilter = null, selectedDate = new Date().toISOString().split('T')[0], isSignupMode = false;
 
-        // --- UI HELPERS ---
-        window.toggleDarkMode = () => {
-            const isDark = document.documentElement.classList.toggle('dark');
-            document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        // Auth Logic
+        window.toggleAuthMode = () => {
+            isSignupMode = !isSignupMode;
+            document.getElementById('auth-title').innerText = isSignupMode ? "Create Account" : "Welcome Back";
+            document.getElementById('auth-subtitle').innerText = isSignupMode ? "Start your productive journey" : "Please login to your account";
+            document.getElementById('auth-btn').innerText = isSignupMode ? "Sign Up" : "Login";
+            document.getElementById('auth-toggle-text').innerText = isSignupMode ? "Already have an account?" : "Don't have an account?";
+            document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Sign Up";
         };
 
-        // දිනය "හෙට" ට සැකසීම සහ වෙලාව සැකසීම
-        function setDefaultInputs() {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-            
-            const dateStr = tomorrow.toISOString().split('T')[0];
-            document.getElementById('taskDate').value = dateStr;
-            
-            const hours = String(today.getHours()).padStart(2, '0');
-            const mins = String(today.getMinutes()).padStart(2, '0');
-            document.getElementById('startTime').value = `${hours}:${mins}`;
-            
-            const endHour = String((today.getHours() + 1) % 24).padStart(2, '0');
-            document.getElementById('endTime').value = `${endHour}:${mins}`;
-            
-            selectedDate = new Date().toISOString().split('T')[0]; // Default agenda to today
-            document.getElementById('agenda-date').innerText = "Today";
+        window.handleAuth = () => {
+            const e = document.getElementById('email').value, p = document.getElementById('password').value;
+            if(!e || !p) return alert("Fill all fields");
+            if(isSignupMode) {
+                createUserWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+            } else {
+                signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
+            }
+        };
+
+        window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
+        window.logout = () => signOut(auth);
+
+        // Sidebar Controls
+        window.openSidebar = () => {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('show');
+        };
+        window.closeSidebar = () => {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('show');
+        };
+
+        // UI Initialization
+        function setupUI() {
+            const t = new Date(); t.setDate(t.getDate() + 1);
+            document.getElementById('taskDate').value = t.toISOString().split('T')[0];
+            const now = new Date();
+            document.getElementById('startTime').value = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+            document.getElementById('endTime').value = (now.getHours()+1).toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+            document.getElementById('date-display').innerText = new Date().toDateString();
         }
 
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
-                setDefaultInputs();
-                initCalendar();
-                syncSubjects(user.uid);
-                loadTasks(user.uid);
+                setupUI(); initCalendar(); syncSubjects(user.uid); loadTasks(user.uid);
             } else {
                 document.getElementById('auth-page').classList.remove('hidden');
             }
         });
 
-        window.handleAuth = (t) => {
-            const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            t === 'signup' ? createUserWithEmailAndPassword(auth, e, p) : signInWithEmailAndPassword(auth, e, p);
-        };
-        window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
-        window.logout = () => signOut(auth);
-
-        window.addSubject = async () => {
-            const name = document.getElementById('newSubName').value.trim();
-            const color = document.getElementById('newSubColor').value;
-            if(!name) return;
-            await setDoc(doc(db, "users", auth.currentUser.uid, "subjects", name), { name, color });
-            document.getElementById('newSubName').value = "";
+        window.toggleDarkMode = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         };
 
+        // Data Syncing
         function syncSubjects(uid) {
             onSnapshot(collection(db, "users", uid, "subjects"), (snap) => {
                 const select = document.getElementById('taskSubject');
                 const sidebar = document.getElementById('sidebar-subject-list');
                 select.innerHTML = '<option value="">Select Subject</option>';
                 sidebar.innerHTML = '';
-                subjects = {};
                 snap.forEach(doc => {
                     const sub = doc.data();
                     subjects[sub.name] = sub.color;
                     select.innerHTML += `<option value="${sub.name}">${sub.name}</option>`;
-                    sidebar.innerHTML += `
-                        <div onclick="filterBySubject('${sub.name}')" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 dark:text-slate-400" id="filter-${sub.name}">
-                            <span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}
-                        </div>`;
+                    sidebar.innerHTML += `<div onclick="filterBySubject('${sub.name}'); closeSidebar()" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500" id="filter-${sub.name}"><span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}</div>`;
                 });
             });
         }
@@ -237,13 +251,8 @@
         window.filterBySubject = (name) => {
             currentFilter = name;
             document.querySelectorAll('.sub-filter, #all-filter').forEach(el => el.classList.remove('active-filter'));
-            if(name) {
-                document.getElementById(`filter-${name}`).classList.add('active-filter');
-                document.getElementById('main-title').innerText = `${name} View`;
-            } else {
-                document.getElementById('all-filter').classList.add('active-filter');
-                document.getElementById('main-title').innerText = "Weekly Grid";
-            }
+            if(name) document.getElementById(`filter-${name}`).classList.add('active-filter');
+            else document.getElementById('all-filter').classList.add('active-filter');
             renderView();
         };
 
@@ -254,41 +263,31 @@
 
         function initCalendar() {
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                initialView: 'timeGridWeek',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
-                slotMinTime: '06:00:00',
-                slotMaxTime: '23:00:00',
-                allDaySlot: false,
-                nowIndicator: true,
-                expandRows: true,
-                height: 'auto',
+                initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: window.innerWidth < 768 ? 'timeGridDay' : 'dayGridMonth,timeGridWeek' },
+                slotMinTime: '06:00:00', slotMaxTime: '23:00:00',
+                allDaySlot: false, nowIndicator: true, expandRows: false, height: 'auto',
                 dateClick: info => { selectedDate = info.dateStr; updateAgenda(); },
                 eventClick: info => { selectedDate = info.event.startStr.split('T')[0]; updateAgenda(); },
                 eventContent: arg => {
                     let c = document.createElement('div');
-                    c.innerHTML = `<div class="text-[9px] font-black opacity-70 uppercase">${arg.timeText}</div><div class="text-[11px] font-bold leading-tight">${arg.event.title}</div>`;
+                    c.innerHTML = `<div class="text-[7px] font-black opacity-70 leading-none">${arg.timeText}</div><div class="text-[9px] font-bold truncate">${arg.event.title}</div>`;
                     return { domNodes: [c] };
                 }
             });
             calendar.render();
+            window.addEventListener('resize', () => {
+                const view = window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek';
+                if(calendar.view.type !== view) calendar.changeView(view);
+            });
         }
 
         window.saveTask = async () => {
-            const title = document.getElementById('taskTitle').value;
-            const sub = document.getElementById('taskSubject').value;
-            const date = document.getElementById('taskDate').value;
-            const start = document.getElementById('startTime').value;
-            const end = document.getElementById('endTime').value;
-            const color = document.getElementById('taskColor').value;
-            if(!title || !date || !sub) return alert("Fill all fields!");
-
-            await addDoc(collection(db, "tasks"), {
-                uid: auth.currentUser.uid,
-                subName: sub,
-                title: `${sub}: ${title}`,
-                date, start: `${date}T${start}`, end: `${date}T${end}`,
-                backgroundColor: color, completed: false
-            });
+            const title = document.getElementById('taskTitle').value, sub = document.getElementById('taskSubject').value,
+                  date = document.getElementById('taskDate').value, start = document.getElementById('startTime').value,
+                  end = document.getElementById('endTime').value, color = document.getElementById('taskColor').value;
+            if(!title || !date || !sub) return alert("Fill all fields");
+            await addDoc(collection(db, "tasks"), { uid: auth.currentUser.uid, subName: sub, title: `${sub}: ${title}`, date, start: `${date}T${start}`, end: `${date}T${end}`, backgroundColor: color, completed: false });
             document.getElementById('taskTitle').value = "";
         };
 
@@ -308,41 +307,25 @@
 
         function updateAgenda() {
             const list = document.getElementById('daily-tasks-list');
-            document.getElementById('agenda-date').innerText = selectedDate || "Today";
-            
-            // Filter by BOTH Date AND Subject (if selected)
+            document.getElementById('agenda-date').innerHTML = `<i class="fas fa-calendar-day opacity-50"></i> ${selectedDate === new Date().toISOString().split('T')[0] ? "Today" : selectedDate}`;
             let dayTasks = allTasks.filter(t => t.date === selectedDate);
-            if(currentFilter) {
-                dayTasks = dayTasks.filter(t => t.subName === currentFilter);
-            }
-            
+            if(currentFilter) dayTasks = dayTasks.filter(t => t.subName === currentFilter);
             dayTasks.sort((a,b) => a.start.localeCompare(b.start));
-            
-            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-20 opacity-40 text-sm'>No sessions found</div>";
+            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-10 opacity-40 text-xs italic'>No targets scheduled for this day</div>";
             dayTasks.forEach(t => {
                 const div = document.createElement('div');
-                div.className = `p-5 rounded-[25px] flex items-center justify-between border-l-[6px] transition-all ${t.completed ? 'bg-indigo-900/40 opacity-50' : 'bg-white text-slate-900 shadow-xl'}`;
+                div.className = `p-4 rounded-[22px] flex items-center justify-between border-l-[5px] ${t.completed ? 'bg-indigo-900/40 opacity-50' : 'bg-white text-slate-900 shadow-lg'}`;
                 div.style.borderColor = t.backgroundColor;
-                div.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-6 h-6 rounded-full accent-green-500 cursor-pointer">
-                        <div>
-                            <p class="font-extrabold text-sm ${t.completed ? 'line-through opacity-50' : ''}">${t.title}</p>
-                            <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
-                        </div>
-                    </div>
-                    <button onclick="deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 p-2"><i class="fas fa-trash-alt text-xs"></i></button>`;
+                div.innerHTML = `<div class="flex items-center gap-3"><input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-5 h-5 rounded-full accent-green-500 cursor-pointer"><div><p class="font-bold text-xs lg:text-sm ${t.completed ? 'line-through opacity-40' : ''}">${t.title}</p><p class="text-[9px] font-black text-indigo-500 uppercase">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p></div></div><button onclick="deleteTask('${t.id}')" class="text-slate-300 p-1"><i class="fas fa-trash-alt text-[10px]"></i></button>`;
                 list.appendChild(div);
             });
         }
 
         window.toggleComplete = async (id, status) => {
-            if(!status) confetti({ particleCount: 150, spread: 70, origin: { y: 0.7 } });
+            if(!status) confetti({ particleCount: 120, spread: 60, origin: { y: 0.8 } });
             await updateDoc(doc(db, "tasks", id), { completed: !status });
         };
-
-        window.deleteTask = async (id) => { if(confirm("Delete session?")) await deleteDoc(doc(db, "tasks", id)); };
-        document.getElementById('date-display').innerText = new Date().toDateString();
+        window.deleteTask = async (id) => { if(confirm("Permanently delete this session?")) await deleteDoc(doc(db, "tasks", id)); };
     </script>
 </body>
 </html>
