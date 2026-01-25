@@ -28,11 +28,9 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
-        .fc-theme-standard td, .fc-theme-standard th { border: 1px solid rgba(0,0,0,0.05) !important; }
-        .dark .fc-theme-standard td, .dark .fc-theme-standard th { border: 1px solid rgba(255,255,255,0.05) !important; }
         .sidebar-item:hover, .sub-filter:hover { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
-        .active-filter { background: #6366f1 !important; color: white !important; }
-        .card-modern { border: 1px solid rgba(0,0,0,0.05); }
+        .active-filter { background: #6366f1 !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3); }
+        .fc-event { border: none !important; padding: 2px 4px; border-radius: 4px; font-weight: 600; font-size: 0.85em; cursor: pointer; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         @media (max-width: 1024px) { #sidebar { display: none; position: fixed; z-index: 60; } #sidebar.open { display: flex; } }
@@ -43,15 +41,19 @@
     <div id="auth-page" class="fixed inset-0 z-[100] bg-bg-light dark:bg-bg-dark flex items-center justify-center p-4">
         <div class="bg-white dark:bg-surface-dark w-full max-w-md p-10 rounded-[40px] shadow-2xl border border-slate-100 dark:border-slate-800">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-graduation-cap text-white text-2xl"></i></div>
+                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
+                    <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                </div>
                 <h1 class="text-3xl font-extrabold tracking-tight">EduPlan Pro</h1>
                 <p class="text-slate-400 mt-2">Professional Academic Planning</p>
             </div>
             <div class="space-y-4">
                 <input type="email" id="email" placeholder="Institutional Email" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                 <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                <button onclick="handleAuth('login')" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">Login</button>
-                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-semibold"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_google_color_128dp.png" class="w-5 h-5"> Google</button>
+                <button onclick="handleAuth('login')" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition">Login to Dashboard</button>
+                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_google_color_128dp.png" class="w-5 h-5"> Google Account
+                </button>
             </div>
         </div>
     </div>
@@ -62,10 +64,10 @@
             <span class="text-xl font-black tracking-tight uppercase">EduPlan</span>
         </div>
         
-        <div class="px-6 mb-4 font-bold text-xs text-slate-400 uppercase tracking-widest">Main Menu</div>
+        <div class="px-6 mb-4 font-bold text-xs text-slate-400 uppercase tracking-widest">Filters</div>
         <nav class="px-6 space-y-1 overflow-y-auto custom-scrollbar flex-grow">
-            <div onclick="filterBySubject(null)" class="sidebar-item active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-4" id="all-filter">
-                <i class="fas fa-grid-2"></i> All Subjects
+            <div onclick="filterBySubject(null)" class="sub-filter active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-4 transition-all" id="all-filter">
+                <i class="fas fa-th-large"></i> All Subjects
             </div>
             <div id="sidebar-subject-list" class="space-y-1">
                 </div>
@@ -75,7 +77,7 @@
             <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold">
                 <i id="theme-icon" class="fas fa-moon"></i> Appearance
             </button>
-            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold">
+            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold hover:bg-red-50 rounded-2xl transition">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
@@ -87,46 +89,46 @@
                 <button onclick="document.getElementById('sidebar').classList.toggle('open')" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800">
                     <i class="fas fa-bars"></i>
                 </button>
-                <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight" id="main-title">Scholar Workspace</h2>
+                <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight" id="main-title">Academic Calendar</h2>
             </div>
             <div id="date-display" class="hidden md:block text-slate-400 font-bold"></div>
         </header>
 
         <div class="p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-12 gap-8">
             <div class="xl:col-span-4 space-y-8">
-                <section class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[35px] card-modern">
-                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-tags text-indigo-500"></i> Manage Subjects</h3>
+                <section class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[35px] shadow-sm border border-slate-100 dark:border-slate-800">
+                    <h3 class="text-lg font-bold mb-4">Add Subject</h3>
                     <div class="flex gap-2">
-                        <input type="text" id="newSubName" placeholder="New Subject" class="flex-grow p-3 rounded-xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                        <input type="text" id="newSubName" placeholder="e.g. Maths" class="flex-grow p-3 rounded-xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         <input type="color" id="newSubColor" class="w-12 h-12 rounded-xl border-none cursor-pointer bg-transparent" value="#6366f1">
-                        <button onclick="addSubject()" class="bg-indigo-600 text-white p-3 px-4 rounded-xl"><i class="fas fa-plus"></i></button>
+                        <button onclick="addSubject()" class="bg-indigo-600 text-white px-4 rounded-xl hover:bg-indigo-700 transition"><i class="fas fa-plus"></i></button>
                     </div>
                 </section>
 
-                <section class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[35px] card-modern">
-                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-500"></i> New Session</h3>
+                <section class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[35px] shadow-sm border border-slate-100 dark:border-slate-800">
+                    <h3 class="text-lg font-bold mb-4">New Session</h3>
                     <div class="space-y-3">
                         <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold">
-                            <option value="">Choose Subject</option>
+                            <option value="">Select Subject</option>
                         </select>
-                        <input type="text" id="taskTitle" placeholder="Session Topic" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                        <input type="text" id="taskTitle" placeholder="What is the topic?" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         <div class="grid grid-cols-2 gap-2">
                             <input type="time" id="startTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                             <input type="time" id="endTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         </div>
                         <input type="hidden" id="taskColor">
-                        <button onclick="saveTask()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:scale-[1.02] transition">Sync to Plan</button>
+                        <button onclick="saveTask()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:opacity-90 transition">Save to Schedule</button>
                     </div>
                 </section>
 
-                <section class="bg-indigo-600 dark:bg-indigo-900 p-6 lg:p-8 rounded-[35px] text-white shadow-2xl min-h-[400px]">
+                <section class="bg-indigo-600 dark:bg-indigo-950 p-6 lg:p-8 rounded-[35px] text-white shadow-2xl min-h-[400px]">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 id="agenda-date" class="text-xl font-bold">Select a date</h3>
-                        <i class="fas fa-calendar-day opacity-50 text-2xl"></i>
+                        <h3 id="agenda-date" class="text-xl font-bold tracking-tight">Focus Agenda</h3>
+                        <i class="fas fa-rocket opacity-40 text-2xl"></i>
                     </div>
                     <div id="daily-tasks-list" class="space-y-4">
-                        <div class="text-center py-20 opacity-50 text-sm">Click a date on the calendar to view sessions</div>
+                        <div class="text-center py-20 opacity-40 text-sm italic font-medium">Select a date on the calendar</div>
                     </div>
                 </section>
             </div>
@@ -158,13 +160,12 @@
         const db = getFirestore(app);
         let calendar, allTasks = [], subjects = {}, currentFilter = null;
 
-        // --- THEME ---
+        // --- UI LOGIC ---
         window.toggleDarkMode = () => {
             const isDark = document.documentElement.classList.toggle('dark');
             document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         };
 
-        // --- AUTH ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('auth-page').classList.add('hidden');
@@ -184,7 +185,7 @@
         window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
         window.logout = () => signOut(auth);
 
-        // --- SUBJECTS & FILTERING ---
+        // --- SUBJECT MANAGEMENT & FILTERING ---
         window.addSubject = async () => {
             const name = document.getElementById('newSubName').value.trim();
             const color = document.getElementById('newSubColor').value;
@@ -197,7 +198,7 @@
             onSnapshot(collection(db, "users", uid, "subjects"), (snap) => {
                 const select = document.getElementById('taskSubject');
                 const sidebar = document.getElementById('sidebar-subject-list');
-                select.innerHTML = '<option value="">Choose Subject</option>';
+                select.innerHTML = '<option value="">Select Subject</option>';
                 sidebar.innerHTML = '';
                 subjects = {};
                 snap.forEach(doc => {
@@ -205,7 +206,7 @@
                     subjects[sub.name] = sub.color;
                     select.innerHTML += `<option value="${sub.name}">${sub.name}</option>`;
                     sidebar.innerHTML += `
-                        <div onclick="filterBySubject('${sub.name}')" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 dark:text-slate-400" id="filter-${sub.name}">
+                        <div onclick="filterBySubject('${sub.name}')" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 dark:text-slate-400 transition-all" id="filter-${sub.name}">
                             <span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}
                         </div>`;
                 });
@@ -215,9 +216,14 @@
         window.filterBySubject = (name) => {
             currentFilter = name;
             document.querySelectorAll('.sub-filter, #all-filter').forEach(el => el.classList.remove('active-filter'));
-            if(name) document.getElementById(`filter-${name}`).classList.add('active-filter');
-            else document.getElementById('all-filter').classList.add('active-filter');
-            renderTasks();
+            if(name) {
+                document.getElementById(`filter-${name}`).classList.add('active-filter');
+                document.getElementById('main-title').innerText = `${name} Sessions`;
+            } else {
+                document.getElementById('all-filter').classList.add('active-filter');
+                document.getElementById('main-title').innerText = "Academic Calendar";
+            }
+            renderToCalendar();
         };
 
         window.applySubjectColor = () => {
@@ -225,14 +231,15 @@
             document.getElementById('taskColor').value = subjects[sub] || "#6366f1";
         };
 
-        // --- TASKS ---
+        // --- CALENDAR & TASKS ---
         function initCalendar() {
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
                 dateClick: info => showDailyTasks(info.dateStr),
                 eventClick: info => showDailyTasks(info.event.startStr.split('T')[0]),
-                height: 'auto'
+                height: 'auto',
+                eventTimeFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' }
             });
             calendar.render();
         }
@@ -244,14 +251,14 @@
             const start = document.getElementById('startTime').value;
             const end = document.getElementById('endTime').value;
             const color = document.getElementById('taskColor').value;
-            if(!title || !date) return alert("Fill Subject & Date");
+            if(!title || !date || !sub) return alert("Fill Subject, Title & Date");
 
             await addDoc(collection(db, "tasks"), {
                 uid: auth.currentUser.uid,
                 subName: sub,
                 title: `${sub}: ${title}`,
                 date, start: `${date}T${start}`, end: `${date}T${end}`,
-                backgroundColor: color, borderColor: 'transparent', completed: false
+                backgroundColor: color, completed: false
             });
             document.getElementById('taskTitle').value = "";
         };
@@ -259,17 +266,17 @@
         function loadTasks(uid) {
             onSnapshot(query(collection(db, "tasks"), where("uid", "==", uid)), (snap) => {
                 allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderTasks();
+                renderToCalendar();
             });
         }
 
-        function renderTasks() {
+        function renderToCalendar() {
             let filtered = currentFilter ? allTasks.filter(t => t.subName === currentFilter) : allTasks;
             calendar.removeAllEvents();
             calendar.addEventSource(filtered.map(t => ({...t, title: t.completed ? `✓ ${t.title}` : t.title})));
             
             const activeDate = document.getElementById('agenda-date').innerText;
-            if(activeDate !== "Select a date") showDailyTasks(activeDate);
+            if(activeDate !== "Focus Agenda") showDailyTasks(activeDate);
         }
 
         window.showDailyTasks = (dateStr) => {
@@ -277,27 +284,27 @@
             const list = document.getElementById('daily-tasks-list');
             const dayTasks = allTasks.filter(t => t.date === dateStr).sort((a,b) => a.start.localeCompare(b.start));
             
-            list.innerHTML = dayTasks.length ? "" : "<p class='text-indigo-200 text-center py-20'>No sessions for this day.</p>";
+            list.innerHTML = dayTasks.length ? "" : "<p class='text-indigo-200 text-center py-20 opacity-50 italic'>Clear day! No sessions.</p>";
             dayTasks.forEach(t => {
                 const div = document.createElement('div');
-                div.className = `p-5 rounded-[25px] flex items-center justify-between border-l-8 transition ${t.completed ? 'bg-indigo-800/40 opacity-60' : 'bg-white text-slate-900 shadow-lg'}`;
+                div.className = `p-5 rounded-[25px] flex items-center justify-between border-l-[6px] transition-all duration-300 ${t.completed ? 'bg-indigo-800/40 opacity-60 scale-95' : 'bg-white text-slate-900 shadow-xl'}`;
                 div.style.borderColor = t.backgroundColor;
                 div.innerHTML = `
                     <div class="flex items-center gap-4">
                         <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-6 h-6 rounded-full accent-green-500 cursor-pointer">
                         <div>
-                            <p class="font-extrabold text-base ${t.completed ? 'line-through' : ''}">${t.title}</p>
-                            <p class="text-xs font-bold text-indigo-500 uppercase tracking-tighter">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
+                            <p class="font-extrabold text-sm ${t.completed ? 'line-through opacity-50' : ''}">${t.title}</p>
+                            <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
                         </div>
                     </div>
-                    <button onclick="deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 transition"><i class="fas fa-trash"></i></button>`;
+                    <button onclick="deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 transition"><i class="fas fa-trash-alt text-xs"></i></button>`;
                 list.appendChild(div);
             });
         };
 
         window.toggleComplete = async (id, status) => {
-            if(!status) { // If completing
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#10b981', '#ffffff'] });
+            if(!status) { 
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.7 }, colors: ['#6366f1', '#10b981', '#ffffff'] });
             }
             await updateDoc(doc(db, "tasks", id), { completed: !status });
         };
