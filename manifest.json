@@ -7,18 +7,15 @@
       "src": "https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=192",
       "type": "image/jpg",
       "sizes": "192x192",
-      "purpose": "any maskable"
     },
     {
-      "src": "https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=512",
+      "src": "https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=192",
       "type": "image/jpg",
-      "sizes": "512x512",
-      "purpose": "any maskable"
+      "sizes": "192x192",
     }
   ],
-  "start_url": "/EduPlan/",
+  "start_url": "/Study_Plan/",
   "display": "standalone",
   "theme_color": "#6366f1",
-  "background_color": "#f8fafc",
-  "orientation": "portrait"
+  "background_color": "#f8fafc"
 }
