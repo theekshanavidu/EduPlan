@@ -16,7 +16,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "/EduPlan/",
   "display": "standalone",
   "theme_color": "#6366f1",
   "background_color": "#f8fafc",
