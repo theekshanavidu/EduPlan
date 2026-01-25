@@ -4,18 +4,16 @@
   "description": "Professional academic schedule and task management system.",
   "icons": [
     {
-      "src": "https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=192",
-      "type": "image/jpg",
-      "sizes": "192x192",
-    },
-    {
-      "src": "https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=192",
-      "type": "image/jpg",
-      "sizes": "192x192",
+      "src": "https://cdn-icons-png.flaticon.com/512/3587/3587033.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "/Study_Plan/",
+  "start_url": "/EduPlan/",
   "display": "standalone",
   "theme_color": "#6366f1",
-  "background_color": "#f8fafc"
+  "background_color": "#f8fafc",
+  "orientation": "portrait",
+  "scope": "/EduPlan/"
 }
