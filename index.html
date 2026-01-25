@@ -3,110 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduPlan | Your Academic Scheduler</title>
-    
+    <title>EduPlan Pro | Smart Scheduler</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-    
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0f4f8; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .fc-header-toolbar { padding: 10px; }
-        .fc-theme-standard td, .fc-theme-standard th { border-color: #e2e8f0; }
-        .fc-event { border-radius: 6px; padding: 2px 4px; border: none; font-weight: 500; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .fc-event { cursor: pointer; transition: transform 0.2s; }
+        .fc-event:hover { transform: scale(1.02); }
+        .completed-task { text-decoration: line-through; opacity: 0.6; }
     </style>
 </head>
 <body class="text-slate-800">
 
     <div id="auth-page" class="flex items-center justify-center min-h-screen p-4">
-        <div class="glass-card w-full max-w-md p-8 rounded-3xl shadow-2xl border border-white">
-            <div class="text-center mb-8">
-                <div class="inline-block p-3 bg-blue-100 rounded-2xl mb-4">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                </div>
-                <h1 class="text-3xl font-bold text-slate-900">EduPlan</h1>
-                <p class="text-slate-500 mt-2">Manage your studies efficiently</p>
-            </div>
-
+        <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl border border-slate-100">
+            <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">EduPlan Pro</h1>
+            
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
-                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
+                <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500">
                 
-                <div class="flex gap-4 pt-2">
-                    <button onclick="handleAuth('login')" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition duration-300">Login</button>
-                    <button onclick="handleAuth('signup')" class="flex-1 bg-slate-100 text-slate-700 py-4 rounded-xl font-bold hover:bg-slate-200 transition duration-300">Sign Up</button>
+                <div class="relative">
+                    <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="togglePassword()" class="absolute right-4 top-4 text-slate-400 hover:text-blue-500">
+                        <svg id="eye-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    </button>
                 </div>
+
+                <div class="flex gap-4">
+                    <button onclick="handleAuth('login')" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Login</button>
+                    <button onclick="handleAuth('signup')" class="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-200 transition">Sign Up</button>
+                </div>
+
+                <div class="relative flex items-center py-4">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-4 text-slate-400 text-sm">OR</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <button onclick="loginWithGoogle()" class="w-full border border-slate-200 p-3 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 transition">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_google_color_128dp.png" class="w-6 h-6">
+                    Continue with Google
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="app-content" class="hidden min-h-screen flex flex-col">
-        <header class="bg-white border-b border-slate-200 p-4 sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <span class="bg-blue-600 text-white p-2 rounded-lg font-bold">EP</span>
-                    <span class="text-xl font-bold tracking-tight">EduPlan</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span id="user-display" class="text-sm font-medium text-slate-600 hidden md:block"></span>
-                    <button onclick="logout()" class="text-sm bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition">Sign Out</button>
-                </div>
-            </div>
+    <div id="app-content" class="hidden min-h-screen">
+        <header class="bg-white border-b p-4 flex justify-between items-center px-8">
+            <span class="text-2xl font-bold text-blue-600">EduPlan</span>
+            <button onclick="logout()" class="text-red-500 font-medium">Logout</button>
         </header>
 
-        <main class="max-w-7xl mx-auto w-full p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 space-y-6">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
-                        <span class="w-1 h-6 bg-blue-600 rounded-full"></span>
-                        Schedule New Task
-                    </h2>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Subject / Activity</label>
-                            <input type="text" id="taskTitle" placeholder="e.g. Mathematics Revison" class="w-full mt-1 p-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-400">
+                    <h2 class="text-xl font-bold mb-4">Add Schedule</h2>
+                    <div class="space-y-3">
+                        <input type="text" id="taskTitle" placeholder="Subject/Task Name" class="w-full p-3 rounded-lg border border-slate-200 outline-none">
+                        <input type="date" id="taskDate" class="w-full p-3 rounded-lg border border-slate-200 outline-none">
+                        <div class="flex gap-2">
+                            <input type="time" id="startTime" class="w-full p-3 rounded-lg border border-slate-200 outline-none">
+                            <input type="time" id="endTime" class="w-full p-3 rounded-lg border border-slate-200 outline-none">
                         </div>
-
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Date</label>
-                            <input type="date" id="taskDate" class="w-full mt-1 p-3 rounded-xl border border-slate-100 bg-slate-50 outline-none">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Start</label>
-                                <input type="time" id="startTime" class="w-full mt-1 p-3 rounded-xl border border-slate-100 bg-slate-50 outline-none">
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">End</label>
-                                <input type="time" id="endTime" class="w-full mt-1 p-3 rounded-xl border border-slate-100 bg-slate-50 outline-none">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Category Color</label>
-                            <input type="color" id="taskColor" class="w-full h-12 mt-1 p-1 rounded-xl bg-slate-50 border border-slate-100 cursor-pointer" value="#6366f1">
-                        </div>
-
-                        <button onclick="saveTask()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 hover:scale-[1.02] transition active:scale-95">Add to Schedule</button>
+                        <input type="color" id="taskColor" class="w-full h-10 rounded-lg cursor-pointer border" value="#3b82f6">
+                        <button onclick="saveTask()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Add Task</button>
                     </div>
+                </div>
+
+                <div id="daily-view" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 min-h-[300px]">
+                    <h2 id="view-date-title" class="text-lg font-bold mb-4 text-blue-600">Select a date to view tasks</h2>
+                    <div id="daily-tasks-list" class="space-y-3">
+                        </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-8">
-                <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
-                    <div id="calendar"></div>
-                </div>
+            <div class="lg:col-span-8 bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                <div id="calendar"></div>
             </div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyALIII2FHy65LTvi4AaC6ulXCd6CCXQ2UM",
@@ -121,42 +102,41 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         let calendar;
+        let allTasks = [];
+
+        // Password Show/Hide
+        window.togglePassword = () => {
+            const pass = document.getElementById('password');
+            pass.type = pass.type === 'password' ? 'text' : 'password';
+        };
 
         // Initialize Calendar
         document.addEventListener('DOMContentLoaded', () => {
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
-                height: 'auto',
-                eventClick: async (info) => {
-                    if (confirm(`Delete "${info.event.title}"?`)) {
-                        await deleteDoc(doc(db, "tasks", info.event.id));
-                    }
-                }
+                dateClick: (info) => showDailyTasks(info.dateStr),
+                events: [],
+                eventClick: (info) => showDailyTasks(info.event.startStr.split('T')[0])
             });
             calendar.render();
         });
 
-        // Authentication Handler
-        window.handleAuth = async (type) => {
+        // Authentication Functions
+        window.handleAuth = (type) => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            if (!email || !password) return alert("Please fill all fields");
-
-            try {
-                if (type === 'signup') await createUserWithEmailAndPassword(auth, email, password);
-                else await signInWithEmailAndPassword(auth, email, password);
-            } catch (err) { alert(err.message); }
+            if (type === 'signup') createUserWithEmailAndPassword(auth, email, password);
+            else signInWithEmailAndPassword(auth, email, password);
         };
 
+        window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
         window.logout = () => signOut(auth);
 
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('app-content').classList.remove('hidden');
-                document.getElementById('user-display').innerText = user.email;
                 loadTasks(user.uid);
             } else {
                 document.getElementById('auth-page').classList.remove('hidden');
@@ -164,7 +144,7 @@
             }
         });
 
-        // Save Data
+        // Save Task
         window.saveTask = async () => {
             const title = document.getElementById('taskTitle').value;
             const date = document.getElementById('taskDate').value;
@@ -172,29 +152,60 @@
             const end = document.getElementById('endTime').value;
             const color = document.getElementById('taskColor').value;
 
-            if (!title || !date || !start) return alert("Task title, date and start time are required.");
-
             await addDoc(collection(db, "tasks"), {
                 uid: auth.currentUser.uid,
-                title,
+                title, date,
                 start: `${date}T${start}`,
-                end: end ? `${date}T${end}` : `${date}T${start}`,
+                end: `${date}T${end}`,
                 backgroundColor: color,
-                borderColor: color
+                completed: false
             });
-            
             document.getElementById('taskTitle').value = "";
         };
 
-        // Sync Data
+        // Load Tasks
         function loadTasks(uid) {
             const q = query(collection(db, "tasks"), where("uid", "==", uid));
             onSnapshot(q, (snapshot) => {
-                const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allTasks = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                 calendar.removeAllEvents();
-                calendar.addEventSource(events);
+                calendar.addEventSource(allTasks.map(t => ({...t, title: t.completed ? `✓ ${t.title}` : t.title})));
+                
+                // Update daily view if date is selected
+                const lastDate = document.getElementById('view-date-title').innerText;
+                if(lastDate !== "Select a date to view tasks") showDailyTasks(lastDate);
             });
         }
+
+        // Show Daily Tasks & Completed logic
+        window.showDailyTasks = (dateStr) => {
+            document.getElementById('view-date-title').innerText = dateStr;
+            const listEl = document.getElementById('daily-tasks-list');
+            const dayTasks = allTasks.filter(t => t.date === dateStr);
+            
+            listEl.innerHTML = dayTasks.length ? "" : "<p class='text-slate-400'>No tasks for this day.</p>";
+            
+            dayTasks.forEach(task => {
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-xl border flex items-center justify-between ${task.completed ? 'bg-green-50' : 'bg-slate-50'}`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleComplete('${task.id}', ${task.completed})" class="w-5 h-5 rounded border-slate-300">
+                        <span class="${task.completed ? 'completed-task' : ''} font-medium">${task.title}</span>
+                    </div>
+                    <button onclick="deleteTask('${task.id}')" class="text-red-400 hover:text-red-600">✕</button>
+                `;
+                listEl.appendChild(div);
+            });
+        };
+
+        window.toggleComplete = async (id, currentStatus) => {
+            await updateDoc(doc(db, "tasks", id), { completed: !currentStatus });
+        };
+
+        window.deleteTask = async (id) => {
+            if(confirm("Delete this task?")) await deleteDoc(doc(db, "tasks", id));
+        };
     </script>
 </body>
 </html>
