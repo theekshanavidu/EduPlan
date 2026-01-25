@@ -1,1014 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
-<meta charset="UTF-8">
-  <meta name="description" content="This is a study plan website for students. Daily study schedules, tips, and learning guidance.">
-  <meta name="keywords" content="study plan, education, student timetable, learning tips">
-<meta name="author" content="Theekshana Vidu">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Study Tracker</title>
-<link rel="icon" type="image/png" href="https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?semt=ais_hybrid&w=740&q=80">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Study Planner</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 5px; border: none ! Bird; }
+        #calendar { height: 80vh; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
 
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  onAuthStateChanged,
-  signOut,
-  updateProfile,
-  updateEmail,
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, addDoc, collection, getDocs, getDoc, query, where, updateDoc, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDYhulc8Qz_xGfIeb1g9A6BGO2wwbrz82M",
-    authDomain: "study-9c374.firebaseapp.com",
-    projectId: "study-9c374",
-    storageBucket: "study-9c374.appspot.com",
-    messagingSenderId: "82946998504",
-    appId: "1:82946998504:web:290cd36a2559846891095d"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
-const ADMIN_UID = "m1rddMA36WbVunFW3B0BzuqOwyI2";
-
-let currentUser = null;
-const appContainer = document.getElementById('app-container');
-const headerGreeting = document.getElementById('header-greeting');
-const headerButtons = document.getElementById('header-buttons');
-
-// ---------- ROUTER SYSTEM ----------
-function navigateTo(path) {
-  window.location.hash = path;
-}
-
-window.addEventListener('hashchange', router);
-
-async function router() {
-  const path = window.location.hash.slice(1) || '/';
-  renderHeader();
-
-  // Public routes
-  if (path === '/' || path === '/welcome') { renderWelcome(); return; }
-  if (path === '/login') { renderLogin(); return; }
-  if (path === '/register') { renderRegister(); return; }
-
-  // Protected routes check
-  if (!currentUser) {
-    // If not logged in and trying to access protected, go to welcome
-    renderWelcome();
-    return;
-  }
-
-  // Route logic
-  if (path === '/home') { renderHome(); }
-  else if (path === '/profile') { renderProfile(); }
-  else if (path === '/timetable') { renderTimetable(); }
-  else if (path === '/adminpanel') { renderAdmin(); }
-  else if (path === '/recording') { renderSubjects(); }
-  
-  // Dynamic Recording Routes: /recording/subject/type/lesson
-  else if (path.startsWith('/recording/')) {
-    const parts = path.split('/'); 
-    const subject = parts[2]; // chemistry, physics, etc
-    const type = parts[3];    // theory, revision
-    const lesson = parts[4];  // lesson01, 02...
-
-    if (subject && type && lesson) {
-      const day = lesson.replace('lesson', '');
-      openLessonPage(subject, type, day);
-    } else if (subject && type) {
-      renderLessons(subject, type);
-    } else if (subject) {
-      renderType(subject);
-    }
-  }
-}
-
-// ---------- Greeting ----------
-function getGreeting(name){
-  const h = new Date().getHours();
-  let greeting = h < 12 ? "Good Morning" : h < 17 ? "Good Afternoon" : "Good Evening";
-  return name ? `${greeting} ${name}` : greeting;
-}
-function updateGreeting(){
-  const name = currentUser?.displayName;
-  const now = new Date();
-  headerGreeting.textContent = `${getGreeting(name)} | ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
-}
-setInterval(updateGreeting, 1000);
-
-// ---------- Auth Listener ----------
-onAuthStateChanged(auth, u=>{
-  currentUser = u;
-  if(currentUser && currentUser.uid===ADMIN_UID) currentUser.displayName="Admin";
-  
-  // Initial Route Load
-  if(!window.location.hash || window.location.hash === '#/') {
-    navigateTo(currentUser ? '/home' : '/welcome');
-  } else {
-    router();
-  }
-});
-
-
-// ---------- Header ----------
-function renderHeader(){
-  headerButtons.innerHTML='';
-  if(currentUser){
-    const homeBtn = createLiquidButton("Home",()=>navigateTo('/home'));
-    const profileBtn = createLiquidButton("Profile",()=>navigateTo('/profile'));
-    const timetableBtn = createLiquidButton("Time Table", ()=>navigateTo('/timetable'));
-    headerButtons.appendChild(timetableBtn);
-    headerButtons.appendChild(homeBtn);
-    headerButtons.appendChild(profileBtn);
-
-    if(currentUser.uid===ADMIN_UID){
-      const adminBtn = createLiquidButton("Admin Panel",()=>navigateTo('/adminpanel'));
-      headerButtons.appendChild(adminBtn);
-    }
-
-    const logoutBtn = createLiquidButton("Logout", async ()=>{
-        await signOut(auth);
-        navigateTo('/welcome');
-    });
-    headerButtons.appendChild(logoutBtn);
-
-  }else{
-    const loginBtn = createLiquidButton("Login",()=>navigateTo('/login'));
-    const regBtn = createLiquidButton("Register",()=>navigateTo('/register'));
-    headerButtons.appendChild(loginBtn);
-    headerButtons.appendChild(regBtn);
-  }
-}
-
-// ---------- Liquid Button Helper ----------
-function createLiquidButton(text, onClick){
-  const btn = document.createElement('button');
-  btn.className = 'liquid-btn';
-  btn.textContent = text;
-  btn.onclick = onClick;
-  return btn;
-}
-
-// ---------- Welcome ----------
-function renderWelcome(){
-  appContainer.innerHTML = `
-  <div class="flex flex-col items-center justify-center h-full gap-6">
-    <h2 class="text-3xl font-bold text-white text-center">Welcome to Study Tracker System</h2>
-    <div class="flex gap-6 flex-wrap mt-4">
-      <button id="welcome-login-btn" class="liquid-btn px-6 py-2 text-white">Login</button>
-      <button id="welcome-register-btn" class="liquid-btn px-6 py-2 text-white">Register</button>
-    </div>
-  </div>`;
-
-  document.getElementById('welcome-login-btn').onclick = () => navigateTo('/login');
-  document.getElementById('welcome-register-btn').onclick = () => navigateTo('/register');
-}
-
-// ---------- Register ----------
-function renderRegister(){
-  appContainer.innerHTML = `
-  <div class="bg-slate-800 p-6 rounded-xl w-full max-w-md mx-auto space-y-3">
-    <h2 class="text-2xl font-bold">Register</h2>
-    <form id="reg-form" class="flex flex-col gap-2">
-      
-      <label for="firstName">First Name</label>
-      <input id="firstName" type="text" name="firstName" placeholder="First Name" class="input-field" required>
-      
-      <label for="lastName">Last Name</label>
-      <input id="lastName" type="text" name="lastName" placeholder="Last Name" class="input-field" required>
-      
-      <label for="birthday">Birthday</label>
-      <input id="birthday" type="date" name="birthday" class="input-field" required>
-      
-      <label for="school">School</label>
-      <input id="school" type="text" name="school" placeholder="School" class="input-field" required>
-      
-      <label for="phone">Phone</label>
-      <input id="phone" type="text" name="phone" placeholder="Phone" class="input-field" required>
-      
-      <label for="examYear">Exam Year</label>
-      <select id="examYear" name="examYear" class="input-field" required>
-        <option>2026 A/L</option>
-        <option>2027 A/L</option>
-        <option>2028 A/L</option>
-      </select>
-      
-      <label for="email">Email</label>
-      <input id="email" type="email" name="email" placeholder="Email" class="input-field" required>
-      
-      <label for="password">Password</label>
-      <input id="password" type="password" name="password" placeholder="Password" class="input-field" required>
-      
-      <button type="submit" class="liquid-btn w-full">Register</button>
-      <div id="reg-error" class="text-red-400"></div>
-    </form>
-        <button class="google-btn w-full mt-3" id="google-register">
-     <img src="https://img.freepik.com/premium-vector/google-logo-icon-transparent-background_1273375-1570.jpg?semt=ais_hybrid&w=740&q=80" class="google-logo" alt="Google logo">
-     Continue with Google
-       </button>
-
-    </div>`;
-  document.getElementById('reg-form').onsubmit = async e=>{
-    e.preventDefault();
-    const f = e.target;
-    try{
-      const cred = await createUserWithEmailAndPassword(auth,f.email.value,f.password.value);
-      await updateProfile(cred.user,{displayName: f.firstName.value + ' ' + f.lastName.value});
-      await setDoc(doc(db,'users',cred.user.uid),{
-        firstName:f.firstName.value,
-        lastName:f.lastName.value,
-        birthday:f.birthday.value,
-        school:f.school.value,
-        phone:f.phone.value,
-        examYear:f.examYear.value,
-        email:f.email.value,
-        createdAt:new Date().toISOString()
-      });
-      navigateTo('/home');
-    }catch(err){ document.getElementById('reg-error').textContent = err.message; }
-  };
- }
-
-// ---------- Login ----------
-function renderLogin(){
-  appContainer.innerHTML = `
-  <div id="auth-section" class="bg-slate-800 p-6 rounded-xl w-full max-w-md mx-auto space-y-3">
-  
-  <h2 class="text-2xl font-bold">Login</h2>
-
-  <form id="login-form" class="flex flex-col gap-2">
-    <input type="email" name="email" placeholder="Email" class="input-field" required>
-    <input type="password" name="password" placeholder="Password" class="input-field" required>
-
-    <div class="flex justify-between items-center mt-2">
-      <button type="submit" class="liquid-btn">Login</button>
-      <button type="button" onclick="handleForgotPassword()" class="text-sm text-slate-300 hover:text-white underline">Forgot?</button>
+    <div id="login-page" class="flex flex-col items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full">
+            <h1 class="text-3xl font-bold text-slate-800 mb-6">Study Planner</h1>
+            <p class="text-slate-500 mb-8">ඔබේ වැඩකටයුතු පහසුවෙන් ප්ලෑන් කරන්න ලොග් වන්න.</p>
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                Google හරහා ඇතුළු වන්න
+            </button>
+        </div>
     </div>
 
-    <div id="login-error" class="text-red-400"></div>
-  </form>
-    <button id="google-login" class="google-btn">
-  <img src="https://img.freepik.com/premium-vector/google-logo-icon-transparent-background_1273375-1570.jpg?semt=ais_hybrid&w=740&q=80" alt="Google" class="google-logo">
-  Continue with Google
-</button>
+    <div id="main-dashboard" class="hidden container mx-auto p-4 lg:p-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <div class="w-full lg:w-1/3 bg-white p-6 rounded-2xl shadow-md h-fit">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold">නව වැඩක් එක් කරන්න</h2>
+                    <button onclick="logout()" class="text-sm text-red-500 hover:underline">Logout</button>
+                </div>
 
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">මාතෘකාව / විශය</label>
+                        <input type="text" id="taskTitle" placeholder="උදා: Physics Practical" class="w-full mt-1 border border-slate-200 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">දිනය</label>
+                        <input type="date" id="taskDate" class="w-full mt-1 border border-slate-200 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-  <div id="complete-profile" style="display:none" class="mt-4 space-y-2">
-    <h2 class="text-xl font-bold">Complete Your Profile</h2>
-    <input id="profile-name" placeholder="Full Name" class="input-field">
-    <input id="profile-class" placeholder="Class / Grade" class="input-field">
-    <input id="profile-school" placeholder="School" class="input-field">
-    <button onclick="saveProfile()" class="liquid-btn w-full">Save</button>
-  </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">පටන් ගන්නා වෙලාව</label>
+                            <input type="time" id="startTime" class="w-full mt-1 border border-slate-200 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">අවසන් වන වෙලාව</label>
+                            <input type="time" id="endTime" class="w-full mt-1 border border-slate-200 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
 
-</div>`;
-document.getElementById('login-form').onsubmit = async e=>{
-  e.preventDefault();
-  const f = e.target;
-  try{
-    const cred = await signInWithEmailAndPassword(auth,f.email.value,f.password.value);
-    currentUser = cred.user;       
-    navigateTo('/home');
-  }catch(err){ 
-    document.getElementById('login-error').textContent = err.message; 
-  }
-};
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">පාටක් තෝරන්න (Color Code)</label>
+                        <input type="color" id="taskColor" class="w-full h-12 mt-1 p-1 border border-slate-200 rounded-lg cursor-pointer" value="#3b82f6">
+                    </div>
 
+                    <button onclick="saveTask()" class="w-full bg-slate-900 text-white py-3 rounded-lg font-semibold hover:bg-slate-800 transition shadow-lg">Calendar එකට එක් කරන්න</button>
+                </div>
+            </div>
 
-  document.getElementById("google-login").onclick = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
+            <div class="w-full lg:w-2/3 bg-white p-4 rounded-2xl shadow-md">
+                <div id="calendar"></div>
+            </div>
 
-    const ref = doc(db, "users", user.uid);
-    const snap = await getDoc(ref);
+        </div>
+    </div>
 
-    if (snap.exists()) {
-      currentUser = user;
-      navigateTo('/home');
-    } else {
-      renderLogin(); 
-      const completeProfile = document.getElementById("complete-profile");
-      const loginForm = document.getElementById("login-form");
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      if (!completeProfile || !loginForm) return;
-
-      loginForm.style.display = "none";
-      completeProfile.style.display = "block";
-
-      const displayName = user.displayName ? user.displayName.split(" ") : ["",""];
-      completeProfile.innerHTML = `
-        <h2 class="text-xl font-bold">Complete Your Profile</h2>
-	<label for="profile-firstName">First Name</label>
-        <input id="profile-firstName" placeholder="First Name" class="input-field" value="${displayName[0]}">
-
- 	<label for="profile-lastName">Last Name</label>
-        <input id="profile-lastName" placeholder="Last Name" class="input-field" value="${displayName[1]}">
-
-	<label for="profile-email">Email</label>
-        <input id="profile-email" placeholder="Email" class="input-field" value="${user.email}" readonly>
-
- 	<label for="profile-birthday">Birthday</label>
-        <input id="profile-birthday" type="date" class="input-field" placeholder="Birthday">
-
- 	<label for="profile-phone">Phone</label>
-        <input id="profile-phone" placeholder="Phone" class="input-field">
-
-	<label for="profile-school">School</label>
-        <input id="profile-school" placeholder="School" class="input-field">
-
-        <select id="profile-examYear" class="input-field">
-          <option>2026 A/L</option>
-          <option>2027 A/L</option>
-          <option>2028 A/L</option>
-        </select>
-        <button id="save-profile-btn" class="liquid-btn w-full">Save</button>
-      `;
-
-      document.getElementById("save-profile-btn").onclick = async () => {
-        const data = {
-          firstName: document.getElementById("profile-firstName").value.trim(),
-          lastName: document.getElementById("profile-lastName").value.trim(),
-          email: user.email,
-          birthday: document.getElementById("profile-birthday").value,
-          phone: document.getElementById("profile-phone").value.trim(),
-          school: document.getElementById("profile-school").value.trim(),
-          examYear: document.getElementById("profile-examYear").value,
-          createdAt: new Date().toISOString()
+        // ඔබේ Firebase Config එක මෙහි ඇත
+        const firebaseConfig = {
+            apiKey: "AIzaSyALIII2FHy65LTvi4AaC6ulXCd6CCXQ2UM",
+            authDomain: "time-planning-4ef59.firebaseapp.com",
+            projectId: "time-planning-4ef59",
+            storageBucket: "time-planning-4ef59.firebasestorage.app",
+            messagingSenderId: "481313041090",
+            appId: "1:481313041090:web:1292cbf4e51f71748e695b",
+            measurementId: "G-YSQ0MXGREW"
         };
 
-        await setDoc(doc(db, "users", user.uid), data);
-        await updateProfile(user, { displayName: `${data.firstName} ${data.lastName}` });
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let calendar;
 
-        alert("Profile saved!");
-        currentUser = user;
-        navigateTo('/home');
-      };
-    }
-  } catch (err) {
-    alert(err.message);
-  }
-};
-}
-
-async function saveProfile() {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const data = {
-    firstName: document.getElementById("profile-firstName").value.trim(),
-    lastName: document.getElementById("profile-lastName").value.trim(),
-    email: document.getElementById("profile-email").value.trim(),
-    birthday: document.getElementById("profile-birthday").value.trim(),
-    phone: document.getElementById("profile-phone").value.trim(),
-    school: document.getElementById("profile-school").value.trim(),
-    examYear: document.getElementById("profile-examYear").value.trim(),
-    createdAt: new Date().toISOString()
-  };
-
-  await setDoc(doc(db, "users", user.uid), data);
-  await updateProfile(user, { displayName: `${data.firstName} ${data.lastName}` });
-
-  alert("Profile saved!");
-  navigateTo('/home');
-}
-
-// ---------- Forget ----------
-async function handleForgotPassword() {
-  const email = prompt("කරුණාකර ඔබගේ Email ලිපිනය ඇතුළත් කරන්න:");
-  if (!email) return;
-
-  try {
-    await sendPasswordResetEmail(auth, email);
-    alert("Password reset කිරීමට අවශ්‍ය ලින්ක් එක ඔබගේ Email ලිපිනයට එවනු ලැබුවා. කරුණාකර ඔබගේ Inbox/Spam පරීක්ෂා කරන්න.");
-  } catch (err) {
-    let errorMsg = "දෝෂයක් සිදු විය: ";
-    if (err.code === 'auth/user-not-found') {
-      errorMsg += "මෙම Email ලිපිනයෙන් ගිණුමක් සොයාගත නොහැක.";
-    } else if (err.code === 'auth/invalid-email') {
-      errorMsg += "Email ලිපිනය නිවැරදි නැත.";
-    } else {
-      errorMsg += err.message;
-    }
-    alert(errorMsg);
-  }
-}
-
-// මෙය window object එකට සම්බන්ධ කරමු එවිට HTML එකෙන් access කළ හැක
-window.handleForgotPassword = handleForgotPassword;
-
-// ---------- Home ----------
-async function renderHome(){
-  appContainer.innerHTML = `
-  <div class="space-y-4 w-full max-w-xl mx-auto">
-    <button id="recording-btn" class="liquid-btn w-full text-xl py-4 mb-4">
-  🎥 Recordings
-</button>
-    <h2 class="text-2xl font-bold">Daily Entry</h2>
-
-    <form id="daily-form" class="space-y-2 flex flex-col gap-2">
-      <input type="date" name="date" value="${new Date().toISOString().slice(0,10)}" class="input-field" required>
-      <input type="number" name="hours" placeholder="Hours studied" min="0" max="24" class="input-field" required>
-      <button class="liquid-btn w-full">Save / Add</button>
-      <div id="daily-msg" class="text-green-400"></div>
-    </form>
-
-    <h3 class="text-xl font-bold mt-4">Update Entry</h3>
-    <form id="update-today-form" class="flex flex-col gap-2">
-      <input type="date" name="updateDate" class="input-field" value="${new Date().toISOString().slice(0,10)}" required>
-      <input type="number" name="updateHours" placeholder="New hours" min="0" max="24" class="input-field">
-      <button class="liquid-btn w-full">Update</button>
-      <div id="update-msg" class="text-green-400"></div>
-    </form>
-
-    <h2 class="text-2xl font-bold mt-4">Weekly Chart</h2>
-    <canvas id="weekly-chart" class="bg-slate-800 rounded p-2"></canvas>
-    <h2 class="text-2xl font-bold mt-4">Monthly Chart</h2>
-    <canvas id="monthly-chart" class="bg-slate-800 rounded p-2"></canvas>
-  </div>`;
-    
-  document.getElementById('daily-form').onsubmit = async e=>{
-    e.preventDefault();
-    const f = e.target;
-    const today = f.date.value;
-    if(Number(f.hours.value) > 24){ alert("Maximum hours per day is 24"); return; }
-
-    const logsSnap = await getDocs(query(collection(db,'studyLogs'), where('userId','==',currentUser.uid), where('date','==',today)));
-    if(logsSnap.docs.length){
-      const docId = logsSnap.docs[0].id;
-      await updateDoc(doc(db,'studyLogs',docId), {hours: Number(f.hours.value)});
-      document.getElementById('daily-msg').textContent = 'Updated!';
-    } else {
-      await addDoc(collection(db,'studyLogs'), {userId: currentUser.uid, date: today, hours: Number(f.hours.value), createdAt:new Date().toISOString()});
-      document.getElementById('daily-msg').textContent = 'Saved!';
-    }
-    renderCharts();
-  };
-document.getElementById("recording-btn").onclick = () => navigateTo('/recording');
-
-
-  // ---------- Update Entry ----------
-  document.getElementById('update-today-form').onsubmit = async e=>{
-    e.preventDefault();
-    const f = e.target;
-    const today = f.updateDate.value; 
-    const newHours = Number(f.updateHours.value);
-    if(newHours > 24){ alert("Maximum hours per day is 24"); return; }
-
-    const logsSnap = await getDocs(query(collection(db,'studyLogs'), where('userId','==',currentUser.uid), where('date','==',today)));
-    if(logsSnap.docs.length){
-      const docId = logsSnap.docs[0].id;
-      await updateDoc(doc(db,'studyLogs',docId), {hours: newHours});
-      document.getElementById('update-msg').textContent = `Entry for ${today} updated!`;
-      f.updateHours.value = '';
-    } else {
-      alert(`No entry for ${today}. Please add it first.`);
-    }
-    renderCharts();
-  };
-
-  renderCharts();
-}
-
-// ---------- Charts ----------
-async function renderCharts(userId = currentUser.uid){
-  const snap = await getDocs(query(collection(db,'studyLogs'), where('userId','==',userId)));
-  const data = snap.docs.map(d=>d.data());
-  const weekly=[], monthly={};
-  const today = new Date();
-
-  for(let i=6;i>=0;i--){
-    const d = new Date();
-    d.setDate(today.getDate()-i);
-    const ds = d.toISOString().slice(0,10);
-    weekly.push(data.filter(x=>x.date===ds).reduce((a,b)=>a+b.hours,0));
-  }
-
-  data.forEach(x=>{
-    const month = x.date.slice(0,7); 
-    monthly[month] = (monthly[month] || 0) + x.hours;
-  });
-
-  const months = Object.keys(monthly).sort((a,b)=>{
-    const [yearA, monthA] = a.split('-').map(Number);
-    const [yearB, monthB] = b.split('-').map(Number);
-    return yearA === yearB ? monthA - monthB : yearA - yearB;
-  });
-  const values = months.map(m => monthly[m]);
-
-  const ctxW = document.getElementById('weekly-chart');
-  if(ctxW){
-    const ctx = ctxW.getContext('2d');
-    window.weeklyChart?.destroy();
-    window.weeklyChart = new Chart(ctx,{
-      type:'line',
-      data:{
-        labels:Array.from({length:7},(_,i)=>{const d=new Date(); d.setDate(today.getDate()-6+i); return d.toISOString().slice(5,10);}),
-        datasets:[{label:'Hours', data:weekly, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.3)', fill:true}]
-      },
-      options: {
-  responsive: true,
-  plugins: { legend: { labels: { color: '#fff' } } },
-  scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' }, beginAtZero: true } }
-}
-    });
-  }
-
-
-  const ctxM = document.getElementById('monthly-chart');
-  if(ctxM){
-    const ctx = ctxM.getContext('2d');
-    window.monthlyChart?.destroy();
-    const monthLabels = months.map(m => {
-        const [year, month] = m.split("-");
-        return new Date(year, month - 1).toLocaleString("en", { month: "short", year: "numeric" });
-    });
-
-    window.monthlyChart = new Chart(ctx,{
-      type:'line',
-      data:{
-        labels:monthLabels,
-        datasets:[{label:'Hours', data:values, borderColor:'#22d3ee', backgroundColor:'rgba(34,211,238,0.3)', fill:true}]
-      },
-      options: {
-  responsive: true,
-  plugins: { legend: { labels: { color: '#fff' } } },
-  scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' }, beginAtZero: true } }
-}
-    });
-  }
-}
-
-
-
-// ---------- Profile ----------
-async function renderProfile(){
-  const snap = await getDoc(doc(db,'users',currentUser.uid));
-  if(!snap.exists()){ alert('Profile not found'); return; }
-  const u = snap.data();
-  appContainer.innerHTML = `
-  <div class="bg-slate-800 p-6 rounded-xl max-w-md mx-auto space-y-4">
-    <h2 class="text-2xl font-bold">${u.firstName} ${u.lastName}</h2>
-    <form id="profile-form" class="flex flex-col gap-2">
-      <label>First Name</label>
-      <input type="text" name="firstName" class="input-field" value="${u.firstName}" required>
-      <label>Last Name</label>
-      <input type="text" name="lastName" class="input-field" value="${u.lastName}" required>
-      <label>Birthday</label>
-      <input type="date" name="birthday" class="input-field" value="${u.birthday}" required>
-      <label>School</label>
-      <input type="text" name="school" class="input-field" value="${u.school}" required>
-      <label>Exam Year</label>
-      <select name="examYear" class="input-field" required>
-        <option ${u.examYear==="2026 A/L"?"selected":""}>2026 A/L</option>
-        <option ${u.examYear==="2027 A/L"?"selected":""}>2027 A/L</option>
-        <option ${u.examYear==="2028 A/L"?"selected":""}>2028 A/L</option>
-      </select>
-      <label>Phone</label>
-      <input type="text" name="phone" class="input-field" value="${u.phone}" required>
-      <label>Email</label>
-      <input type="email" name="email" class="input-field" value="${u.email}" required>
-      <button type="submit" class="liquid-btn w-full">Update Profile</button>
-      <div id="profile-msg" class="text-green-400"></div>
-    </form>
-  </div>`;
-  document.getElementById('profile-form').onsubmit = async e=>{
-    e.preventDefault();
-    const f = e.target;
-    const updatedData = {
-      firstName:f.firstName.value,
-      lastName:f.lastName.value,
-      birthday:f.birthday.value,
-      school:f.school.value,
-      examYear:f.examYear.value,
-      phone:f.phone.value
-    };
-    await updateDoc(doc(db,'users',currentUser.uid), updatedData);
-    if(f.email.value !== currentUser.email){
-      try{
-        await updateEmail(currentUser, f.email.value);
-        await sendEmailVerification(currentUser);
-        alert('Email updated. Verification email sent.');
-      }catch(err){ alert(err.message); }
-    }
-    document.getElementById('profile-msg').textContent = 'Profile updated!';
-  };
-}
-
-// ---------- Time Table ----------
-async function renderTimetable() {
-  if (!currentUser) { alert("Please login to access Time Table."); return; }
-
-  const ttRef = doc(db, "timetable", currentUser.uid);
-  const ttSnap = await getDoc(ttRef);
-  const savedData = ttSnap.exists() ? ttSnap.data() : {};
-
-  const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-  const hours = Array.from({length:24}, (_,i)=>{
-    const fmt = (hr)=> { const suffix = hr < 12 ? "am" : "pm"; const h = hr%12||12; return `${h}${suffix}`; };
-    return `${fmt(i)} - ${fmt(i+1)}`;
-  });
-
-  appContainer.innerHTML = `
-    <div class="bg-slate-800 p-4 rounded-xl w-full flex flex-col gap-4">
-      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-        <h2 class="text-2xl font-bold">Weekly Time Table</h2>
-        <div class="flex flex-wrap gap-2">
-          <button id="tt-fill-free" class="liquid-btn">Fill "Free"</button>
-          <button id="tt-clear" class="liquid-btn">Clear All</button>
-          <button id="save-timetable" class="liquid-btn">Save Time Table</button>
-          <button id="export-pdf" class="liquid-btn">Export PDF</button>
-        </div>
-      </div>
-      <p class="text-sm text-slate-400 md:hidden">👉 Swipe left / right to see full timetable</p>
-      <div class="overflow-x-auto w-full">
-        <table id="tt-table" class="border border-slate-600 text-sm table-auto min-w-max">
-          <thead>
-            <tr>
-              <th class="border p-3 text-center min-w-[110px]">Hour</th>
-              ${days.map(d=>`<th class="border p-3 text-center whitespace-nowrap">${d}</th>`).join("")}
-            </tr>
-          </thead>
-          <tbody>
-            ${hours.map((h, hourIndex)=>{
-              return `<tr>
-                <td class="border p-3 text-center whitespace-nowrap font-semibold">${h}</td>
-                ${days.map((day, dayIndex)=>{
-                  const cellId = `tt_${dayIndex}_${hourIndex}`;
-                  const val = (savedData && savedData[cellId]) ? savedData[cellId] : "";
-                  return `<td class="border p-1">
-                  <input id="${cellId}" class="bg-slate-900 p-2 rounded text-center min-w-[130px] placeholder-slate-500 italic" placeholder="${h}" value="${val}">
-                  </td>`;
-                }).join("")}
-              </tr>`;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>
-      <div id="tt-msg" class="text-green-400 mt-2"></div>
-    </div>
-    <div class="hidden md:block mt-6">
-      <h2 class="text-2xl font-bold">Weekly Chart</h2>
-      <canvas id="weekly-chart" class="bg-slate-800 rounded p-2 w-full" height="200"></canvas>
-      <h2 class="text-2xl font-bold mt-6">Monthly Chart</h2>
-      <canvas id="monthly-chart" class="bg-slate-800 rounded p-2 w-full" height="200"></canvas>
-    </div>
-  `;
-
-  document.getElementById("tt-fill-free").onclick = ()=> {
-    days.forEach((_,d)=> hours.forEach((_,h)=>{
-      const el = document.getElementById(`tt_${d}_${h}`);
-      if(el && el.value.trim()==="") el.value="Free";
-    }));
-  };
-
-  document.getElementById("tt-clear").onclick = ()=> {
-    if(!confirm("Clear all timetable entries?")) return;
-    days.forEach((_,d)=> hours.forEach((_,h)=>{
-      const el = document.getElementById(`tt_${d}_${h}`);
-      if(el) el.value="";
-    }));
-  };
-
-  document.getElementById("save-timetable").onclick = async ()=>{
-    const saveObj = {};
-    days.forEach((_,d)=> hours.forEach((_,h)=>{
-      const el = document.getElementById(`tt_${d}_${h}`);
-      if(el && el.value.trim()!=="") saveObj[`tt_${d}_${h}`] = el.value.trim();
-    }));
-    try{
-      await setDoc(ttRef, saveObj);
-      document.getElementById("tt-msg").textContent = "Time Table saved successfully!";
-    }catch(err){ document.getElementById("tt-msg").textContent = "Save failed: " + err.message; }
-    renderCharts();
-  };
-
-  renderCharts();
-
-  document.getElementById("export-pdf").onclick = () => {
-    const pdf = new jspdf.jsPDF('p', 'pt', 'a4');
-    const tableData = [];
-    hours.forEach((h, hourIndex) => {
-        const row = [h];
-        days.forEach((_, dayIndex) => {
-            const val = document.getElementById(`tt_${dayIndex}_${hourIndex}`).value.trim();
-            row.push(val || "");
+        // Calendar එක සකස් කිරීම
+        const calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            eventClick: function(info) {
+                if(confirm("මේ වැඩේ මකා දමන්නද?")) {
+                    deleteDoc(doc(db, "tasks", info.event.id));
+                }
+            }
         });
-        tableData.push(row);
-    });
-    pdf.autoTable({
-        head: [['Hour', ...days]],
-        body: tableData,
-        theme: 'grid',
-        styles: { fontSize: 10, cellPadding: 4 },
-        headStyles: { fillColor: [30, 41, 59], textColor: 255 },
-    });
-    pdf.save(`timetable_${currentUser.uid}.pdf`);
-  };
-}
+        calendar.render();
 
-function renderSubjects(){
-  appContainer.innerHTML = `
-    <h2 class="text-2xl font-bold mb-6">Select Subject</h2>
-    <div class="flex flex-col gap-4">
-      <button id="btn-maths" class="flex items-center gap-4 bg-slate-800 p-4 rounded-xl hover:bg-slate-700">
-        <img src="https://api.combinedmaths.lk/files-public/profiles/281124/1862199793225306112.jpg" class="w-24 h-24 rounded-xl object-cover">
-        <span class="text-xl font-bold">Combine Maths - Ruwan Darshana</span>
-      </button>
-      <button id="btn-physics" class="flex items-center gap-4 bg-slate-800 p-4 rounded-xl hover:bg-slate-700">
-        <img src="https://static.indeepa.lk/lecturer/7/en/652248466c448.jpg" class="w-24 h-24 rounded-xl object-cover">
-        <span class="text-xl font-bold">Physics - Anuradha Perera</span>
-      </button>
-      <button id="btn-chemistry" class="flex items-center gap-4 bg-slate-800 p-4 rounded-xl hover:bg-slate-700">
-        <img src="https://static.indeepa.lk/lecturer/6/en/6522475ddf2bf.jpg" class="w-24 h-24 rounded-xl object-cover">
-        <span class="text-xl font-bold">Chemistry - Amila Dasanayake</span>
-      </button>
-    </div>
-  `;
-  document.getElementById("btn-maths").onclick = () => navigateTo('/recording/maths');
-  document.getElementById("btn-physics").onclick = () => navigateTo('/recording/physics');
-  document.getElementById("btn-chemistry").onclick = () => navigateTo('/recording/chemistry');
-}
+        // Auth Logic: User ලොග් වී ඇත්දැයි බැලීම
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('main-dashboard').classList.remove('hidden');
+                loadTasks(user.uid);
+            } else {
+                document.getElementById('login-page').classList.remove('hidden');
+                document.getElementById('main-dashboard').classList.add('hidden');
+            }
+        });
 
-function renderType(subject){
-  appContainer.innerHTML = `
-    <h2 class="text-2xl font-bold mb-6">${subject.toUpperCase()}</h2>
-    <div class="flex gap-6">
-      <button class="liquid-btn text-xl px-8 py-4" id="btn-theory">Theory</button>
-      <button class="liquid-btn text-xl px-8 py-4" id="btn-revision">Revision</button>
-    </div>
-  `;
-  document.getElementById("btn-theory").onclick = ()=> navigateTo(`/recording/${subject}/theory`);
-  document.getElementById("btn-revision").onclick = ()=> navigateTo(`/recording/${subject}/revision`);
-}
+        // Login Function
+        window.login = () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider).catch(err => alert(err.message));
+        };
 
+        // Logout Function
+        window.logout = () => signOut(auth);
 
-async function renderLessons(subject, type){
-  appContainer.innerHTML = `
-    <h2 class="text-2xl font-bold mb-4">${subject.toUpperCase()} - ${type.toUpperCase()}</h2>
-    <div id="lessons-list" class="flex flex-col gap-3"></div>
-  `;
-  const list = document.getElementById("lessons-list");
-  let lessonsData = {};
-  try{
-    const snap = await getDocs(query(collection(db,"lessons"),where("subject","==",subject),where("type","==",type)));
-    snap.forEach(doc=>{ lessonsData[doc.data().day] = doc.data().title; });
-  }catch(err){ console.warn(err); }
+        // Save Task Function
+        window.saveTask = async () => {
+            const title = document.getElementById('taskTitle').value;
+            const date = document.getElementById('taskDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const color = document.getElementById('taskColor').value;
 
-  for(let i=1;i<=20;i++){
-    const day = String(i).padStart(2,"0");
-    const title = lessonsData[day] || `Day ${day} - Lesson Title`;
-    const row = document.createElement("div");
-    row.className = "flex gap-2 items-center";
-    const lessonBtn = document.createElement("button");
-    lessonBtn.className = "liquid-btn flex-1";
-    lessonBtn.textContent = title;
-    lessonBtn.onclick = ()=> navigateTo(`/recording/${subject}/${type}/lesson${day}`);
-    row.appendChild(lessonBtn);
-    if(currentUser && currentUser.uid === ADMIN_UID){
-      const editBtn = document.createElement("button");
-      editBtn.className = "liquid-btn bg-yellow-500";
-      editBtn.textContent = "✏️";
-      editBtn.onclick = ()=> renameLesson(i, subject, type);
-      row.appendChild(editBtn);
-    }
-    list.appendChild(row);
-  }
-}
+            if(!title || !date || !startTime) return alert("කරුණාකර සියලු විස්තර ලබා දෙන්න.");
 
-async function renameLesson(i, subject, type){
-  const day = String(i).padStart(2, "0");
-  const newName = prompt("New lesson name:");
-  if(!newName) return;
-  await setDoc(doc(db, "lessons", `${subject}_${type}_${day}`), { title: newName, subject, type, day });
-  renderLessons(subject, type);
-}
+            try {
+                await addDoc(collection(db, "tasks"), {
+                    uid: auth.currentUser.uid,
+                    title: title,
+                    start: `${date}T${startTime}:00`,
+                    end: endTime ? `${date}T${endTime}:00` : `${date}T${startTime}:00`,
+                    backgroundColor: color,
+                    borderColor: color,
+                    allDay: false
+                });
+                // Form එක Reset කිරීම
+                document.getElementById('taskTitle').value = "";
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        };
 
-async function openLessonPage(subject, type, day){
-  const lessonId = `${subject}_${type}_${day}`;
-  appContainer.innerHTML = `
-    <h2 class="text-2xl font-bold mb-4">Lesson ${day}</h2>
-    <div id="content-list" class="flex flex-col gap-3 mb-6"></div>
-    ${currentUser?.uid === ADMIN_UID ? `
-      <div class="flex gap-2">
-        <input id="content-text" placeholder="Text" class="border p-2 flex-1 text-black">
-        <input id="content-link" placeholder="Link" class="border p-2 flex-1 text-black">
-        <button id="add-content-btn" class="liquid-btn">Add</button>
-      </div>
-    ` : ``}
-  `;
-  loadLessonContents(lessonId);
-  if(currentUser?.uid === ADMIN_UID){
-    document.getElementById("add-content-btn").onclick = () => addContent(lessonId);
-  }
-}
-
-async function loadLessonContents(lessonId){
-  const list = document.getElementById("content-list");
-  list.innerHTML = "";
-  const snap = await getDocs(query(collection(db,"lessonContents"),where("lessonId","==",lessonId),orderBy("order","asc")));
-  snap.forEach(docSnap=>{
-    const d = docSnap.data();
-    const id = docSnap.id;
-    const div = document.createElement("div");
-    div.className = "border p-3 flex justify-between items-center";
-    div.innerHTML = `<a href="${d.link}" target="_blank" class="text-blue-600 underline">${d.text}</a>`;
-    if(currentUser?.uid === ADMIN_UID){
-      const bc = document.createElement("div"); bc.className = "flex gap-2";
-      bc.innerHTML = `<button onclick="moveContent('${id}',-1)">⬆️</button><button onclick="moveContent('${id}',1)">⬇️</button><button onclick="deleteContent('${id}')">🗑️</button>`;
-      div.appendChild(bc);
-    }
-    list.appendChild(div);
-  });
-}
-
-async function addContent(lessonId){
-  const text = document.getElementById("content-text").value.trim();
-  const link = document.getElementById("content-link").value.trim();
-  if(!text || !link) return;
-  const snap = await getDocs(query(collection(db,"lessonContents"), where("lessonId","==",lessonId)));
-  await addDoc(collection(db,"lessonContents"),{ lessonId, text, link, order: snap.size + 1, createdAt: Date.now() });
-  loadLessonContents(lessonId);
-}
-
-async function deleteContent(id){
-  if(!confirm("Delete?")) return;
-  await deleteDoc(doc(db,"lessonContents",id));
-  router();
-}
-
-async function moveContent(id,dir){
-  const ref = doc(db,"lessonContents",id);
-  const snap = await getDoc(ref);
-  const d = snap.data();
-  const newOrder = d.order + dir;
-  const q = query(collection(db,"lessonContents"),where("lessonId","==",d.lessonId),where("order","==",newOrder));
-  const swap = await getDocs(q);
-  if(swap.empty) return;
-  await updateDoc(ref,{order:newOrder});
-  await updateDoc(doc(db,"lessonContents",swap.docs[0].id),{order:d.order});
-  loadLessonContents(d.lessonId);
-}
-
-// ---------- Admin Panel ----------
-async function renderAdmin() {
-  appContainer.innerHTML = `<h2 class="text-2xl font-bold mb-4">Admin Panel</h2><input id="admin-search" placeholder="Search..." class="input-field mb-4 w-full"><div id="admin-users" class="space-y-2"></div><div id="admin-user-details" class="mt-6"></div>`;
-  const usersSnap = await getDocs(collection(db,'users'));
-  let users = usersSnap.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-  const usersContainer = document.getElementById('admin-users');
-  const displayUsers = (list) => {
-    usersContainer.innerHTML = '';
-    list.forEach(u => {
-      const div = document.createElement('div');
-      div.className = 'bg-slate-800 p-3 rounded flex justify-between items-center';
-      div.innerHTML = `<div><strong>${u.firstName} ${u.lastName}</strong> (${u.email})</div><div class="flex gap-2"><button onclick="renderAdminUserDetails('${u.id}')" class="liquid-btn">View</button><button onclick="deleteAdminUser('${u.id}','${u.firstName}')" class="liquid-btn">Delete</button></div>`;
-      usersContainer.appendChild(div);
-    });
-  };
-  displayUsers(users);
-  document.getElementById('admin-search').oninput = e => {
-    const term = e.target.value.toLowerCase();
-    displayUsers(users.filter(u => (u.firstName + ' ' + u.lastName).toLowerCase().includes(term) || u.email.toLowerCase().includes(term)));
-  };
-}
-
-async function renderAdminUserDetails(uid) {
-  const detailsContainer = document.getElementById('admin-user-details');
-  
-  // User ගේ දත්ත ලබා ගැනීම
-  const userSnap = await getDoc(doc(db, 'users', uid));
-  if (!userSnap.exists()) return;
-  const u = userSnap.data();
-
-  // Admin Panel එකේ details පෙන්වන HTML එක
-  detailsContainer.innerHTML = `
-    <div class="bg-slate-800 p-6 rounded-xl space-y-4 mt-6 border border-indigo-500">
-      <h3 class="text-2xl font-bold text-indigo-400">${u.firstName} ${u.lastName} ගේ විස්තර</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-        <p><strong>Email:</strong> ${u.email}</p>
-        <p><strong>School:</strong> ${u.school}</p>
-        <p><strong>Phone:</strong> ${u.phone}</p>
-        <p><strong>Exam Year:</strong> ${u.examYear}</p>
-      </div>
-      
-      <div class="space-y-6 mt-4">
-        <div>
-          <h4 class="text-lg font-semibold mb-2 text-white">Weekly Study Progress</h4>
-          <canvas id="admin-weekly-chart" class="bg-slate-900 rounded p-2"></canvas>
-        </div>
-        <div>
-          <h4 class="text-lg font-semibold mb-2 text-white">Monthly Study Progress</h4>
-          <canvas id="admin-monthly-chart" class="bg-slate-900 rounded p-2"></canvas>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Charts පෙන්වීම සඳහා දත්ත ලබා ගැනීම
-  const snap = await getDocs(query(collection(db, 'studyLogs'), where('userId', '==', uid)));
-  const data = snap.docs.map(d => d.data());
-  const weekly = [], monthly = {};
-  const today = new Date();
-
-  // සතියේ දත්ත සකස් කිරීම
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(today.getDate() - i);
-    const ds = d.toISOString().slice(0, 10);
-    weekly.push(data.filter(x => x.date === ds).reduce((a, b) => a + b.hours, 0));
-  }
-
-  // මාසික දත්ත සකස් කිරීම
-  data.forEach(x => {
-    const month = x.date.slice(0, 7);
-    monthly[month] = (monthly[month] || 0) + x.hours;
-  });
-
-  const months = Object.keys(monthly).sort();
-  const monthValues = months.map(m => monthly[m]);
-
-  // Weekly Chart එක ඇඳීම
-  const ctxW = document.getElementById('admin-weekly-chart').getContext('2d');
-  new Chart(ctxW, {
-    type: 'line',
-    data: {
-      labels: Array.from({ length: 7 }, (_, i) => { 
-        const d = new Date(); d.setDate(today.getDate() - 6 + i); 
-        return d.toISOString().slice(5, 10); 
-      }),
-      datasets: [{ label: 'Hours', data: weekly, borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.3)', fill: true }]
-    },
-    options: { plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' }, beginAtZero: true } } }
-  });
-
-  // Monthly Chart එක ඇඳීම
-  const ctxM = document.getElementById('admin-monthly-chart').getContext('2d');
-  new Chart(ctxM, {
-    type: 'bar',
-    data: {
-      labels: months,
-      datasets: [{ label: 'Monthly Hours', data: monthValues, backgroundColor: '#22d3ee' }]
-    },
-    options: { plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' }, beginAtZero: true } } }
-  });
-}
-
-async function deleteAdminUser(uid,name){
-  if(confirm(`Delete ${name}?`)){ await deleteDoc(doc(db,'users',uid)); renderAdmin(); }
-}
-
-window.renderAdminUserDetails = renderAdminUserDetails;
-window.deleteAdminUser = deleteAdminUser;
-window.moveContent = moveContent;
-window.deleteContent = deleteContent;
-window.saveProfile = saveProfile;
-
-</script>
-
-<style>
-body{background:black;color:white;min-height:100vh;}
-.input-field{padding:0.5rem;border-radius:0.5rem;background:#1e293b;border:none;color:white;width:100%;}
-.liquid-btn{position:relative;padding:0.5rem 1.5rem;color:white;overflow:hidden;border:none;border-radius:1rem;background:#0ea5e9;cursor:pointer;font-weight:bold;margin:0.2rem;transition:0.3s;}
-.liquid-btn::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:rgba(255,255,255,0.2);transform:skewX(-20deg);transition:0.5s;}
-.liquid-btn:hover::before{left:100%;}
-.liquid-btn:hover{box-shadow:0 0 20px #0ea5e9;}
-.google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0.5rem 1.5rem; border: 2px solid #0ea5e9; border-radius: 0.5rem; background: transparent; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-.google-btn:hover { background: rgba(14, 165, 233, 0.1); box-shadow: 0 0 10px #0ea5e9; }
-.google-logo { width: 20px; height: 20px; }
-</style>
-</head>
-<body class="flex flex-col items-center justify-start p-4 min-h-screen">
-
-<header class="w-full p-4 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 shadow-lg flex justify-between items-center flex-wrap">
-  <h1 class="text-2xl font-bold cursor-pointer" onclick="window.location.hash='/home'">StudyTracker</h1>
-  <div id="header-greeting" class="text-lg"></div>
-  <div id="header-buttons" class="flex gap-2 flex-wrap"></div>
-</header>
-
-<main class="flex-1 w-full max-w-xl sm:max-w-3xl lg:max-w-7xl mt-4 px-2 sm:px-4" id="app-container">
-</main>
-
-<footer class="text-sm text-slate-400 mt-4 w-full text-center">
-  © Owner 2026
-</footer>
-
+        // Database එකෙන් දත්ත Calendar එකට ගැනීම
+        function loadTasks(uid) {
+            const q = query(collection(db, "tasks"), where("uid", "==", uid));
+            onSnapshot(q, (snapshot) => {
+                const events = [];
+                snapshot.forEach(docSnap => {
+                    let data = docSnap.data();
+                    data.id = docSnap.id; // මකා දැමීමට අවශ්‍ය නිසා ID එක ගන්නවා
+                    events.push(data);
+                });
+                calendar.removeAllEvents();
+                calendar.addEventSource(events);
+            });
+        }
+    </script>
 </body>
 </html>
