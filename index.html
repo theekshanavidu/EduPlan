@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -29,11 +30,12 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
         .fc-theme-standard td, .fc-theme-standard th { border: 1px solid rgba(0,0,0,0.05) !important; }
         .dark .fc-theme-standard td, .dark .fc-theme-standard th { border: 1px solid rgba(255,255,255,0.05) !important; }
-        .sidebar-item:hover { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
-        .card-modern { transition: transform 0.2s; border: 1px solid rgba(0,0,0,0.05); }
-        .card-modern:hover { transform: translateY(-2px); shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .sidebar-item:hover, .sub-filter:hover { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+        .active-filter { background: #6366f1 !important; color: white !important; }
+        .card-modern { border: 1px solid rgba(0,0,0,0.05); }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        @media (max-width: 1024px) { #sidebar { display: none; position: fixed; z-index: 60; } #sidebar.open { display: flex; } }
     </style>
 </head>
 <body class="bg-bg-light dark:bg-bg-dark text-slate-800 dark:text-slate-100 min-h-screen flex">
@@ -41,94 +43,96 @@
     <div id="auth-page" class="fixed inset-0 z-[100] bg-bg-light dark:bg-bg-dark flex items-center justify-center p-4">
         <div class="bg-white dark:bg-surface-dark w-full max-w-md p-10 rounded-[40px] shadow-2xl border border-slate-100 dark:border-slate-800">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
-                    <i class="fas fa-graduation-cap text-white text-2xl"></i>
-                </div>
+                <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-graduation-cap text-white text-2xl"></i></div>
                 <h1 class="text-3xl font-extrabold tracking-tight">EduPlan Pro</h1>
                 <p class="text-slate-400 mt-2">Professional Academic Planning</p>
             </div>
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Institutional Email" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-indigo-500">
-                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-indigo-500">
-                <button onclick="handleAuth('login')" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition">Login to Dashboard</button>
-                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_google_color_128dp.png" class="w-5 h-5"> Google Account
-                </button>
+                <input type="email" id="email" placeholder="Institutional Email" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                <button onclick="handleAuth('login')" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">Login</button>
+                <button onclick="loginWithGoogle()" class="w-full border dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-semibold"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_google_color_128dp.png" class="w-5 h-5"> Google</button>
             </div>
         </div>
     </div>
 
-    <aside id="sidebar" class="hidden w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex-col sticky top-0 h-screen">
+    <aside id="sidebar" class="w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex-col sticky top-0 h-screen">
         <div class="p-8 flex items-center gap-3">
             <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center"><i class="fas fa-layer-group text-white"></i></div>
             <span class="text-xl font-black tracking-tight uppercase">EduPlan</span>
         </div>
         
-        <nav class="flex-grow px-6 space-y-2 mt-4">
-            <div class="sidebar-item p-4 rounded-2xl flex items-center gap-4 cursor-pointer text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 font-bold">
-                <i class="fas fa-chart-pie"></i> Dashboard
+        <div class="px-6 mb-4 font-bold text-xs text-slate-400 uppercase tracking-widest">Main Menu</div>
+        <nav class="px-6 space-y-1 overflow-y-auto custom-scrollbar flex-grow">
+            <div onclick="filterBySubject(null)" class="sidebar-item active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-4" id="all-filter">
+                <i class="fas fa-grid-2"></i> All Subjects
             </div>
-            <div class="sidebar-item p-4 rounded-2xl flex items-center gap-4 cursor-pointer text-slate-400 font-bold">
-                <i class="fas fa-book-open"></i> Subjects
-            </div>
+            <div id="sidebar-subject-list" class="space-y-1">
+                </div>
         </nav>
 
-        <div class="p-8 border-t border-slate-100 dark:border-slate-800 space-y-4">
+        <div class="p-8 border-t border-slate-100 dark:border-slate-800 space-y-2">
             <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold">
                 <i id="theme-icon" class="fas fa-moon"></i> Appearance
             </button>
-            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold hover:bg-red-50 rounded-2xl transition">
+            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
     </aside>
 
     <main id="app-content" class="hidden flex-grow flex flex-col h-screen overflow-y-auto custom-scrollbar">
-        <header class="p-8 flex justify-between items-center bg-bg-light/80 dark:bg-bg-dark/80 backdrop-blur-md sticky top-0 z-10">
-            <div>
-                <h2 class="text-3xl font-extrabold">Scholar Workspace</h2>
-                <p id="date-display" class="text-slate-400 font-medium"></p>
+        <header class="p-6 lg:p-8 flex justify-between items-center sticky top-0 z-10 bg-bg-light/80 dark:bg-bg-dark/80 backdrop-blur-md">
+            <div class="flex items-center gap-4">
+                <button onclick="document.getElementById('sidebar').classList.toggle('open')" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight" id="main-title">Scholar Workspace</h2>
             </div>
+            <div id="date-display" class="hidden md:block text-slate-400 font-bold"></div>
         </header>
 
-        <div class="p-8 grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div class="p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-12 gap-8">
             <div class="xl:col-span-4 space-y-8">
-                
-                <section class="bg-white dark:bg-surface-dark p-8 rounded-[35px] card-modern">
-                    <h3 class="text-lg font-bold mb-6 flex items-center gap-2"><i class="fas fa-tags text-indigo-500"></i> Subjects</h3>
-                    <div id="subject-chips" class="flex flex-wrap gap-2 mb-6"></div>
+                <section class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[35px] card-modern">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-tags text-indigo-500"></i> Manage Subjects</h3>
                     <div class="flex gap-2">
-                        <input type="text" id="newSubName" placeholder="Subject Name" class="flex-grow p-3 rounded-xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                        <input type="color" id="newSubColor" class="w-12 h-12 rounded-xl border-none cursor-pointer" value="#6366f1">
-                        <button onclick="addSubject()" class="bg-indigo-600 text-white p-3 rounded-xl"><i class="fas fa-plus"></i></button>
+                        <input type="text" id="newSubName" placeholder="New Subject" class="flex-grow p-3 rounded-xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                        <input type="color" id="newSubColor" class="w-12 h-12 rounded-xl border-none cursor-pointer bg-transparent" value="#6366f1">
+                        <button onclick="addSubject()" class="bg-indigo-600 text-white p-3 px-4 rounded-xl"><i class="fas fa-plus"></i></button>
                     </div>
                 </section>
 
-                <section class="bg-white dark:bg-surface-dark p-8 rounded-[35px] card-modern">
-                    <h3 class="text-lg font-bold mb-6 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-500"></i> New Session</h3>
-                    <div class="space-y-4">
+                <section class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[35px] card-modern">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-500"></i> New Session</h3>
+                    <div class="space-y-3">
                         <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold">
-                            <option value="">Select Subject</option>
+                            <option value="">Choose Subject</option>
                         </select>
-                        <input type="text" id="taskTitle" placeholder="Topic: e.g. Quantum Physics" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
+                        <input type="text" id="taskTitle" placeholder="Session Topic" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2">
                             <input type="time" id="startTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                             <input type="time" id="endTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none">
                         </div>
                         <input type="hidden" id="taskColor">
-                        <button onclick="saveTask()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-indigo-100 dark:shadow-none hover:scale-[1.02] transition">Add to Timetable</button>
+                        <button onclick="saveTask()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:scale-[1.02] transition">Sync to Plan</button>
                     </div>
                 </section>
 
-                <section class="bg-slate-900 dark:bg-indigo-950 p-8 rounded-[35px] text-white shadow-2xl min-h-[400px]">
-                    <h3 id="agenda-date" class="text-xl font-bold mb-6">Select Date</h3>
-                    <div id="daily-tasks-list" class="space-y-4"></div>
+                <section class="bg-indigo-600 dark:bg-indigo-900 p-6 lg:p-8 rounded-[35px] text-white shadow-2xl min-h-[400px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="agenda-date" class="text-xl font-bold">Select a date</h3>
+                        <i class="fas fa-calendar-day opacity-50 text-2xl"></i>
+                    </div>
+                    <div id="daily-tasks-list" class="space-y-4">
+                        <div class="text-center py-20 opacity-50 text-sm">Click a date on the calendar to view sessions</div>
+                    </div>
                 </section>
             </div>
 
             <div class="xl:col-span-8">
-                <div class="bg-white dark:bg-surface-dark p-8 rounded-[40px] shadow-sm border border-slate-100 dark:border-slate-800">
+                <div class="bg-white dark:bg-surface-dark p-6 lg:p-8 rounded-[40px] shadow-sm border border-slate-100 dark:border-slate-800">
                     <div id="calendar"></div>
                 </div>
             </div>
@@ -152,20 +156,18 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let calendar, allTasks = [], subjects = {};
+        let calendar, allTasks = [], subjects = {}, currentFilter = null;
 
-        // --- THEME LOGIC ---
+        // --- THEME ---
         window.toggleDarkMode = () => {
             const isDark = document.documentElement.classList.toggle('dark');
             document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         };
 
-        // --- AUTH LOGIC ---
+        // --- AUTH ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 document.getElementById('auth-page').classList.add('hidden');
-                document.getElementById('sidebar').classList.remove('hidden');
-                document.getElementById('sidebar').classList.add('flex');
                 document.getElementById('app-content').classList.remove('hidden');
                 initCalendar();
                 syncSubjects(user.uid);
@@ -175,17 +177,16 @@
             }
         });
 
-        window.handleAuth = (type) => {
+        window.handleAuth = (t) => {
             const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            if(type === 'signup') createUserWithEmailAndPassword(auth, e, p).catch(alert);
-            else signInWithEmailAndPassword(auth, e, p).catch(alert);
+            t === 'signup' ? createUserWithEmailAndPassword(auth, e, p) : signInWithEmailAndPassword(auth, e, p);
         };
         window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
         window.logout = () => signOut(auth);
 
-        // --- SUBJECT MANAGEMENT ---
+        // --- SUBJECTS & FILTERING ---
         window.addSubject = async () => {
-            const name = document.getElementById('newSubName').value;
+            const name = document.getElementById('newSubName').value.trim();
             const color = document.getElementById('newSubColor').value;
             if(!name) return;
             await setDoc(doc(db, "users", auth.currentUser.uid, "subjects", name), { name, color });
@@ -195,25 +196,36 @@
         function syncSubjects(uid) {
             onSnapshot(collection(db, "users", uid, "subjects"), (snap) => {
                 const select = document.getElementById('taskSubject');
-                const chips = document.getElementById('subject-chips');
-                select.innerHTML = '<option value="">Select Subject</option>';
-                chips.innerHTML = '';
+                const sidebar = document.getElementById('sidebar-subject-list');
+                select.innerHTML = '<option value="">Choose Subject</option>';
+                sidebar.innerHTML = '';
                 subjects = {};
                 snap.forEach(doc => {
                     const sub = doc.data();
                     subjects[sub.name] = sub.color;
                     select.innerHTML += `<option value="${sub.name}">${sub.name}</option>`;
-                    chips.innerHTML += `<span class="px-3 py-1 rounded-full text-[10px] font-black uppercase text-white" style="background:${sub.color}">${sub.name}</span>`;
+                    sidebar.innerHTML += `
+                        <div onclick="filterBySubject('${sub.name}')" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 dark:text-slate-400" id="filter-${sub.name}">
+                            <span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}
+                        </div>`;
                 });
             });
         }
+
+        window.filterBySubject = (name) => {
+            currentFilter = name;
+            document.querySelectorAll('.sub-filter, #all-filter').forEach(el => el.classList.remove('active-filter'));
+            if(name) document.getElementById(`filter-${name}`).classList.add('active-filter');
+            else document.getElementById('all-filter').classList.add('active-filter');
+            renderTasks();
+        };
 
         window.applySubjectColor = () => {
             const sub = document.getElementById('taskSubject').value;
             document.getElementById('taskColor').value = subjects[sub] || "#6366f1";
         };
 
-        // --- CALENDAR & TASKS ---
+        // --- TASKS ---
         function initCalendar() {
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth',
@@ -232,11 +244,11 @@
             const start = document.getElementById('startTime').value;
             const end = document.getElementById('endTime').value;
             const color = document.getElementById('taskColor').value;
-
-            if(!title || !date) return alert("Fill required fields");
+            if(!title || !date) return alert("Fill Subject & Date");
 
             await addDoc(collection(db, "tasks"), {
                 uid: auth.currentUser.uid,
+                subName: sub,
                 title: `${sub}: ${title}`,
                 date, start: `${date}T${start}`, end: `${date}T${end}`,
                 backgroundColor: color, borderColor: 'transparent', completed: false
@@ -247,36 +259,50 @@
         function loadTasks(uid) {
             onSnapshot(query(collection(db, "tasks"), where("uid", "==", uid)), (snap) => {
                 allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                calendar.removeAllEvents();
-                calendar.addEventSource(allTasks.map(t => ({...t, title: t.completed ? `✓ ${t.title}` : t.title})));
+                renderTasks();
             });
+        }
+
+        function renderTasks() {
+            let filtered = currentFilter ? allTasks.filter(t => t.subName === currentFilter) : allTasks;
+            calendar.removeAllEvents();
+            calendar.addEventSource(filtered.map(t => ({...t, title: t.completed ? `✓ ${t.title}` : t.title})));
+            
+            const activeDate = document.getElementById('agenda-date').innerText;
+            if(activeDate !== "Select a date") showDailyTasks(activeDate);
         }
 
         window.showDailyTasks = (dateStr) => {
             document.getElementById('agenda-date').innerText = dateStr;
             const list = document.getElementById('daily-tasks-list');
-            const filtered = allTasks.filter(t => t.date === dateStr).sort((a,b) => a.start.localeCompare(b.start));
+            const dayTasks = allTasks.filter(t => t.date === dateStr).sort((a,b) => a.start.localeCompare(b.start));
             
-            list.innerHTML = filtered.length ? "" : "<p class='text-indigo-300 opacity-50 text-center py-10'>No sessions planned.</p>";
-            filtered.forEach(t => {
+            list.innerHTML = dayTasks.length ? "" : "<p class='text-indigo-200 text-center py-20'>No sessions for this day.</p>";
+            dayTasks.forEach(t => {
                 const div = document.createElement('div');
-                div.className = `p-4 rounded-[20px] flex items-center justify-between ${t.completed ? 'bg-indigo-900/50 opacity-50' : 'bg-white/10 hover:bg-white/20'} transition`;
+                div.className = `p-5 rounded-[25px] flex items-center justify-between border-l-8 transition ${t.completed ? 'bg-indigo-800/40 opacity-60' : 'bg-white text-slate-900 shadow-lg'}`;
+                div.style.borderColor = t.backgroundColor;
                 div.innerHTML = `
                     <div class="flex items-center gap-4">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-5 h-5 accent-indigo-500">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-6 h-6 rounded-full accent-green-500 cursor-pointer">
                         <div>
-                            <p class="font-bold text-sm ${t.completed ? 'line-through' : ''}">${t.title}</p>
-                            <p class="text-[10px] font-bold text-indigo-300 uppercase">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
+                            <p class="font-extrabold text-base ${t.completed ? 'line-through' : ''}">${t.title}</p>
+                            <p class="text-xs font-bold text-indigo-500 uppercase tracking-tighter">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
                         </div>
                     </div>
-                    <button onclick="deleteTask('${t.id}')" class="text-indigo-400 hover:text-white"><i class="fas fa-trash-alt text-xs"></i></button>`;
+                    <button onclick="deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 transition"><i class="fas fa-trash"></i></button>`;
                 list.appendChild(div);
             });
         };
 
-        window.toggleComplete = async (id, status) => await updateDoc(doc(db, "tasks", id), { completed: !status });
-        window.deleteTask = async (id) => { if(confirm("Delete this session?")) await deleteDoc(doc(db, "tasks", id)); };
-        
+        window.toggleComplete = async (id, status) => {
+            if(!status) { // If completing
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#10b981', '#ffffff'] });
+            }
+            await updateDoc(doc(db, "tasks", id), { completed: !status });
+        };
+
+        window.deleteTask = async (id) => { if(confirm("Delete session?")) await deleteDoc(doc(db, "tasks", id)); };
         document.getElementById('date-display').innerText = new Date().toDateString();
     </script>
 </body>
