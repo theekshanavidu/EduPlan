@@ -11,6 +11,8 @@
     <link rel="icon" type="image/png" href="https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=740">
 
     <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
@@ -51,9 +53,58 @@
             .order-plan { order: 2; }
             .order-calendar { order: 3; }
             .order-agenda { order: 4; }
-            #calendar { height: 550px !important; border-radius: 24px; overflow: hidden; background: white; }
+
+            /* Calendar Table එකේ උස සහ පෙනුම මෙතැනින් වෙනස් කර ඇත */
+            #calendar { 
+                height: 1000px !important; /* Table එකේ සම්පූර්ණ උස 1000px දක්වා වැඩි කළා */
+                border-radius: 30px; 
+                overflow: hidden; 
+                background: white; 
+                box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            }
+
+            /* වෙලාවන් පෙන්වන තීරුවල උස (slots height) */
+            .fc-timegrid-slot { 
+                height: 1.5em !important; 
+            }
+
             input, select, button { font-size: 16px !important; }
         }
+	/* Mobile Header Optimization */
+.fc-header-toolbar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+    padding: 0 10px;
+}
+
+.fc-toolbar-chunk {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100%;
+}
+
+/* Arrow buttons සහ Today button එක පේළියට තැබීම */
+.fc-button-group {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-radius: 12px;
+}
+
+.fc-button {
+    padding: 8px 16px !important;
+    text-transform: capitalize !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+
+/* මැද තියෙන මාසය සහ දිනය පෙන්වන අකුරු */
+.fc-toolbar-title {
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    color: #1e293b;
+}
         
         .active-filter { background: #6366f1 !important; color: white !important; }
         #sidebar-overlay { display: none; }
@@ -78,19 +129,19 @@
             <div class="space-y-4">
                 <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 ring-indigo-500 transition text-sm">
                 <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 ring-indigo-500 transition text-sm">
+                
                 <button id="auth-btn" onclick="handleAuth()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition">Login</button>
-                <div class="text-center text-xs">
-                    <span id="auth-toggle-text">New to EduPlan?</span>
-                    <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-indigo-600 font-bold ml-1">Create Account</button>
+                
+                <div class="flex flex-col items-center gap-4 mt-2">
+                    <button id="forgot-btn" onclick="forgotPassword()" class="text-[11px] font-bold text-slate-400 hover:text-indigo-600 transition uppercase">
+                        Forgot Password?
+                    </button>
+
+                    <div class="text-xs">
+                        <span id="auth-toggle-text">New to EduPlan?</span>
+                        <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-indigo-600 font-bold ml-1">Create Account</button>
+                    </div>
                 </div>
-                <div class="relative flex py-3 items-center">
-                    <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
-                    <span class="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">Or</span>
-                    <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
-                </div>
-                <button onclick="loginWithGoogle()" class="w-full border border-slate-200 dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold text-sm hover:bg-slate-50 transition">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4"> Google Login
-                </button>
             </div>
         </div>
     </div>
@@ -183,7 +234,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -202,11 +253,50 @@
         let calendar, allTasks = [], subjects = {}, currentFilter = null, selectedDate = new Date().toISOString().split('T')[0], isSignupMode = false;
 
         window.toggleAuthMode = () => {
-            isSignupMode = !isSignupMode;
-            document.getElementById('auth-title').innerText = isSignupMode ? "Create Account" : "EduPlan Pro";
-            document.getElementById('auth-btn').innerText = isSignupMode ? "Sign Up" : "Login";
-            document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Sign Up";
-        };
+    isSignupMode = !isSignupMode;
+    const forgotBtn = document.querySelector('[onclick="forgotPassword()"]').parentElement;
+    
+    // Sign up mode එකේදී Forgot Password බටන් එක සඟවන්න
+    forgotBtn.style.display = isSignupMode ? 'none' : 'block';
+    
+    document.getElementById('auth-title').innerText = isSignupMode ? "Create Account" : "EduPlan Pro";
+    document.getElementById('auth-btn').innerText = isSignupMode ? "Sign Up" : "Login";
+    document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Sign Up";
+    document.getElementById('auth-toggle-text').innerText = isSignupMode ? "Already have an account?" : "New to EduPlan?";
+};
+
+
+// Forgot Password function එක
+window.forgotPassword = () => {
+    const email = document.getElementById('email').value;
+    
+    if (!email) {
+        alert("කරුණාකර මුලින්ම ඔබේ Email ලිපිනය ඇතුළත් කරන්න.");
+        return;
+    }
+
+    // Loader එකක් පෙන්වීමට හෝ බටන් එක disable කිරීමට මෙය හොඳයි
+    console.log("Attempting to send reset email to:", email);
+
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            alert("සාර්ථකයි! Password reset link එක ඔබේ Email එකට එවා ඇත.");
+        })
+        .catch((error) => {
+            console.error("Firebase Error:", error.code, error.message);
+            
+            // වැරදි පණිවිඩය පැහැදිලිව පෙන්වන්න
+            if (error.code === 'auth/user-not-found') {
+                alert("මෙම Email ලිපිනයෙන් ලියාපදිංචි වූ ගිණුමක් සොයාගත නොහැක.");
+            } else if (error.code === 'auth/invalid-email') {
+                alert("ඇතුළත් කළ Email ලිපිනය දෝෂ සහිතයි.");
+            } else if (error.code === 'auth/too-many-requests') {
+                alert("වැඩි වාර ගණනක් උත්සාහ කර ඇත. කරුණාකර මද වේලාවකින් උත්සාහ කරන්න.");
+            } else {
+                alert("දෝෂයක් සිදු විය: " + error.message);
+            }
+        });
+};
 
         window.handleAuth = () => {
             const e = document.getElementById('email').value, p = document.getElementById('password').value;
@@ -215,7 +305,7 @@
             else signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
         };
 
-        window.loginWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
+        
         window.logout = () => signOut(auth);
         window.openSidebar = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); };
         window.closeSidebar = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); };
@@ -250,40 +340,77 @@
                 setupDefaults(); initCalendar(); syncSubjects(user.uid); loadTasks(user.uid);
             } else { document.getElementById('auth-page').classList.remove('hidden'); }
         });
+	// සෑම තත්පරයකම වේලාව පරීක්ෂා කර මධ්‍යම රාත්‍රියේදී Agenda එක Refresh කිරීම
+setInterval(() => {
+    const now = new Date();
+    if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
+        setupDefaults(); // අද දවස අලුතින් ගණනය කිරීම
+        updateAgenda();  // Agenda list එක අලුත් කිරීම
+        if(calendar) calendar.today(); // Calendar එකත් අද දවසට ගෙනයෑම
+    }
+}, 1000);
 
         function setupDefaults() {
-            const now = new Date();
-            document.getElementById('taskDate').value = now.toISOString().split('T')[0];
-            document.getElementById('startTime').value = now.getHours().toString().padStart(2,'0') + ":00";
-            document.getElementById('endTime').value = (now.getHours()+1).toString().padStart(2,'0') + ":00";
-            document.getElementById('date-display').innerText = now.toDateString();
-        }
+    const now = new Date();
+    // UTC වෙනුවට Local Date එක ලබා ගැනීම
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const localDate = `${year}-${month}-${day}`;
+    
+    selectedDate = localDate; // Agenda එකට අද දවස ලබා දීම
+    document.getElementById('taskDate').value = localDate;
+    document.getElementById('startTime').value = now.getHours().toString().padStart(2, '0') + ":00";
+    document.getElementById('endTime').value = (now.getHours() + 1).toString().padStart(2, '0') + ":00";
+    document.getElementById('date-display').innerText = now.toDateString();
+}
 
         function initCalendar() {
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-                initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' },
-                slotMinTime: '06:00:00', slotMaxTime: '23:00:00',
-                allDaySlot: false, height: 'auto', nowIndicator: true, selectable: true,
-                
-                // Fixed Date Handling: Any click on calendar sets the context correctly
-                dateClick: info => { 
-                    selectedDate = info.dateStr.split('T')[0]; 
-                    updateAgenda(); 
-                },
-                eventClick: info => { 
-                    selectedDate = info.event.startStr.split('T')[0]; 
-                    updateAgenda(); 
-                },
-                eventContent: arg => {
-                    let c = document.createElement('div');
-                    c.className = "p-1";
-                    c.innerHTML = `<div class="text-[9px] font-black opacity-60 uppercase">${arg.timeText}</div><div class="text-[10px] font-bold truncate">${arg.event.title}</div>`;
-                    return { domNodes: [c] };
-                }
-            });
-            calendar.render();
+	timeZone: 'Asia/Colombo',
+        initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
+        headerToolbar: { 
+            // Mobile එකේදී මේ layout එක වඩාත් සුදුසුයි
+            left: 'prev,today,next', 
+            center: 'title', 
+            right: window.innerWidth < 768 ? '' : 'timeGridWeek,timeGridDay' 
+        },
+        buttonText: {
+            today: 'Today',
+            week: 'Week',
+            day: 'Day'
+        },
+        // කාල සීමාව උදේ 5 සිට රෑ 12 දක්වා වැඩි කළා
+        slotMinTime: '00:00:00', 
+        slotMaxTime: '24:00:00',
+        allDaySlot: false,
+        
+        // Mobile එකේදී Table එක දිගට පෙනීමට fixed height එකක් දුන්නා
+        contentHeight: window.innerWidth < 768 ? 800 : 'auto',
+        height: 'auto',
+        
+        nowIndicator: true,
+        selectable: true,
+        stickyHeaderDates: true, // Scroll කරද්දී දවස පෙනෙන්නට
+        handleWindowResize: true,
+        
+        dateClick: info => { 
+            selectedDate = info.dateStr.split('T')[0]; 
+            updateAgenda(); 
+        },
+        eventClick: info => { 
+            selectedDate = info.event.startStr.split('T')[0]; 
+            updateAgenda(); 
+        },
+        eventContent: arg => {
+            let c = document.createElement('div');
+            c.className = "p-1";
+            c.innerHTML = `<div class="text-[10px] font-black opacity-70 uppercase leading-tight">${arg.timeText}</div><div class="text-[11px] font-bold truncate">${arg.event.title}</div>`;
+            return { domNodes: [c] };
         }
+    });
+    calendar.render();
+}
 
         window.saveTask = async () => {
             const title = document.getElementById('taskTitle').value, sub = document.getElementById('taskSubject').value,
