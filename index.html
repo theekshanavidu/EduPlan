@@ -10,6 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="icon" type="image/png" href="https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=740">
 
+	<script src="capacitor.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
@@ -358,23 +359,81 @@ window.forgotPassword = () => {
             });
         }
 
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                document.getElementById('auth-page').classList.add('hidden');
-                document.getElementById('app-content').classList.remove('hidden');
-                setupDefaults(); initCalendar(); syncSubjects(user.uid); loadTasks(user.uid);
-            } else { document.getElementById('auth-page').classList.remove('hidden'); }
-        });
-	// සෑම තත්පරයකම වේලාව පරීක්ෂා කර මධ්‍යම රාත්‍රියේදී Agenda එක Refresh කිරීම
+        // Auth ස්වභාවය වෙනස් වන විට
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        document.getElementById('auth-page').classList.add('hidden');
+        document.getElementById('app-content').classList.remove('hidden');
+        
+        setupDefaults(); 
+        initCalendar(); 
+        syncSubjects(user.uid); 
+        loadTasks(user.uid);
+        
+        // APK එකේ Notification අවසර ඉල්ලීම
+        requestNotificationPermission();
+    } else { 
+        document.getElementById('auth-page').classList.remove('hidden'); 
+        document.getElementById('app-content').classList.add('hidden');
+    }
+});
+
+// විනාඩියකට වරක් වේලාව පරීක්ෂා කිරීම (බැටරි ඉතිරි කිරීමට 1000ms වෙනුවට 60000ms හොඳයි)
 setInterval(() => {
     const now = new Date();
-    if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
-        setupDefaults(); // අද දවස අලුතින් ගණනය කිරීම
-        updateAgenda();  // Agenda list එක අලුත් කිරීම
-        if(calendar) calendar.today(); // Calendar එකත් අද දවසට ගෙනයෑම
+    if (now.getHours() === 0 && now.getMinutes() === 0) {
+        setupDefaults(); 
+        updateAgenda();  
+        if (calendar) calendar.today(); 
     }
-}, 1000);
+}, 60000);
 
+// Notification අවසර ලබා ගැනීම
+async function requestNotificationPermission() {
+    try {
+        const { LocalNotifications } = await import('https://cdn.jsdelivr.net/npm/@capacitor/local-notifications@latest/dist/esm/index.js');
+        const status = await LocalNotifications.checkPermissions();
+        
+        if (status.display !== 'granted') {
+            await LocalNotifications.requestPermissions();
+        }
+    } catch (e) {
+        console.warn("Capacitor Notifications are only available in the APK/Native app.");
+    }
+}
+
+
+
+		async function scheduleLocalNotification(title, subName, startTimeStr) {
+    try {
+        // Capacitor Notification ප්ලගිනය load කිරීම
+        const { LocalNotifications } = await import('https://cdn.jsdelivr.net/npm/@capacitor/local-notifications@latest/dist/esm/index.js');
+        
+        const scheduleDate = new Date(startTimeStr);
+        const now = new Date();
+
+        // වෙලාව අනාගතයේ එකක් නම් පමණක් schedule කරන්න
+        if (scheduleDate > now) {
+            await LocalNotifications.schedule({
+                notifications: [{
+                    title: `EduPlan: ${subName}`, // විෂයය නම
+                    body: `දැන් වෙලාව හරි: ${title}`, // task එකේ නම
+                    id: Math.floor(Math.random() * 1000000), // අහඹු අංකයක්
+                    schedule: { at: scheduleDate }, // නියමිත වෙලාව
+                    sound: 'default', // standard ශබ්දය
+                    actionTypeId: "",
+                    extra: null
+                }]
+            });
+            console.log("Notification set for: " + startTimeStr);
+        }
+    } catch (e) {
+        // APK එකක් ලෙස නෙවෙයි නම් browser එකේදී console එකේ error එකක් පෙන්වයි
+        console.warn("Notification error (Browser එකේදී මෙය ක්‍රියා නොකරයි):", e);
+    }
+}
+
+		
         function setupDefaults() {
     const now = new Date();
     // UTC වෙනුවට Local Date එක ලබා ගැනීම
@@ -446,12 +505,22 @@ setInterval(() => {
             document.getElementById('taskTitle').value = "";
         };
 
-        function loadTasks(uid) {
-            onSnapshot(query(collection(db, "tasks"), where("uid", "==", uid)), (snap) => {
-                allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderView();
-            });
-        }
+       function loadTasks(uid) {
+    onSnapshot(query(collection(db, "tasks"), where("uid", "==", uid)), (snap) => {
+        allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // සෑම task එකක් සඳහාම notification එකක් schedule කිරීම
+        allTasks.forEach(task => {
+            if (task.date && task.start) {
+                // ISO string එකේ (2023-10-25T14:30) T අකුරෙන් පසු කොටස වෙලාවයි
+                const startTime = task.start; 
+                scheduleLocalNotification(task.title, task.subName, startTime);
+            }
+        });
+
+        renderView();
+    });
+}
 
         function renderView() {
             let filtered = currentFilter ? allTasks.filter(t => t.subName === currentFilter) : allTasks;
