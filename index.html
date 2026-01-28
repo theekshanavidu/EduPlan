@@ -70,6 +70,31 @@
 
             input, select, button { font-size: 16px !important; }
         }
+
+/* Calendar එක Scroll කිරීමට ඉඩ ලබා දීම */
+.fc .fc-view-harness {
+    overflow-x: auto !important;
+}
+
+.fc-scroller {
+    overflow: auto !important;
+}
+
+/* Mobile වලදී සතියේ දවස් පේන්න නම් table එකට අවම පළලක් දිය යුතුයි */
+@media (max-width: 768px) {
+    .fc-view {
+        min-width: 700px; /* සතියම පේන්න නම් 700px වත් අවශ්‍ය වේ */
+    }
+    
+    /* Header buttons කුඩා කිරීමට */
+    .fc .fc-toolbar-title {
+        font-size: 1.1rem !important;
+    }
+    .fc .fc-button {
+        padding: 0.4em 0.6em !important;
+        font-size: 0.8rem !important;
+    }
+}
 	/* Mobile Header Optimization */
 .fc-header-toolbar {
     display: flex !important;
