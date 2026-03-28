@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EduPlan Pro</title>
+    <title>Manage Your Time.</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#8b5cf6">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="icon" type="image/png" href="https://img.freepik.com/premium-vector/reading-owl-logo-simple-vector-design_609149-1053.jpg?w=740">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4144/4144802.png">
 
-	<script src="capacitor.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
@@ -25,186 +22,124 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { light: '#6366f1', dark: '#818cf8' },
-                        surface: { light: '#ffffff', dark: '#1e293b' },
-                        bg: { light: '#f8fafc', dark: '#0f172a' }
+                        brand: { light: '#8b5cf6', dark: '#a78bfa' },
+                        surface: { light: 'rgba(255, 255, 255, 0.8)', dark: 'rgba(30, 41, 59, 0.75)' },
+                        bg: { light: '#f1f5f9', dark: '#020617' }
                     }
                 }
             }
         }
     </script>
-
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
-        .fc-v-event { border-radius: 8px !important; border: none !important; padding: 4px !important; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .fc-event-title { font-weight: 700 !important; font-size: 0.75rem !important; }
-        .fc-timegrid-slot { height: 3.5em !important; border-bottom: 1px solid rgba(0,0,0,0.03) !important; }
-        
-        @media (max-width: 1024px) {
-            #sidebar { 
-                position: fixed; left: -105%; z-index: 1000; 
-                transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-                height: 100vh; width: 85%; max-width: 320px;
-                box-shadow: 20px 0 50px rgba(0,0,0,0.1);
-            }
-            #sidebar.open { left: 0; }
-            #sidebar-overlay.show { display: block; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 900; backdrop-filter: blur(4px); }
-            .mobile-stack { display: flex; flex-direction: column; gap: 1.5rem; }
-            .order-subject { order: 1; }
-            .order-plan { order: 2; }
-            .order-calendar { order: 3; }
-            .order-agenda { order: 4; }
-
-            /* Calendar Table එකේ උස සහ පෙනුම මෙතැනින් වෙනස් කර ඇත */
-            #calendar { 
-                height: 1000px !important; /* Table එකේ සම්පූර්ණ උස 1000px දක්වා වැඩි කළා */
-                border-radius: 30px; 
-                overflow: hidden; 
-                background: white; 
-                box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-            }
-
-            /* වෙලාවන් පෙන්වන තීරුවල උස (slots height) */
-            .fc-timegrid-slot { 
-                height: 1.5em !important; 
-            }
-
-            input, select, button { font-size: 16px !important; }
-        }
-
-/* Calendar එක Scroll කිරීමට ඉඩ ලබා දීම */
-.fc .fc-view-harness {
-    overflow-x: auto !important;
-}
-
-.fc-scroller {
-    overflow: auto !important;
-}
-
-/* Mobile වලදී සතියේ දවස් පේන්න නම් table එකට අවම පළලක් දිය යුතුයි */
-@media (max-width: 768px) {
-    .fc-view {
-        min-width: 700px; /* සතියම පේන්න නම් 700px වත් අවශ්‍ය වේ */
-    }
-    
-    /* Header buttons කුඩා කිරීමට */
-    .fc .fc-toolbar-title {
-        font-size: 1.1rem !important;
-    }
-    .fc .fc-button {
-        padding: 0.4em 0.6em !important;
-        font-size: 0.8rem !important;
-    }
-}
-	/* Mobile Header Optimization */
-.fc-header-toolbar {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-    margin-bottom: 20px !important;
-    padding: 0 10px;
-}
-
-.fc-toolbar-chunk {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100%;
-}
-
-/* Arrow buttons සහ Today button එක පේළියට තැබීම */
-.fc-button-group {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border-radius: 12px;
-}
-
-.fc-button {
-    padding: 8px 16px !important;
-    text-transform: capitalize !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
-}
-
-/* මැද තියෙන මාසය සහ දිනය පෙන්වන අකුරු */
-.fc-toolbar-title {
-    font-size: 1.2rem !important;
-    font-weight: 800 !important;
-    color: #1e293b;
-}
-        
-        .active-filter { background: #6366f1 !important; color: white !important; }
-        #sidebar-overlay { display: none; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-bg-light dark:bg-bg-dark text-slate-800 dark:text-slate-100 min-h-screen flex overflow-x-hidden">
 
-    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+    <div id="sidebar-overlay" onclick="window.closeSidebar()"></div>
 
-    <div id="auth-page" class="fixed inset-0 z-[1100] bg-bg-light dark:bg-bg-dark flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-surface-dark w-full max-w-md p-8 rounded-[40px] shadow-2xl border border-slate-100 dark:border-slate-800">
+    <div id="permission-blocked-page" class="hidden fixed inset-0 z-[2000] bg-slate-900/90 backdrop-blur-3xl flex flex-col items-center justify-center p-6 text-center text-white">
+        <div class="bg-slate-800 p-8 rounded-3xl max-w-sm w-full border border-red-500/30 shadow-2xl shadow-red-500/20">
+            <i class="fas fa-bell-slash text-5xl text-red-500 mb-6 animate-pulse"></i>
+            <h2 class="text-2xl font-bold mb-4">Notifications Needed!</h2>
+            <p class="text-slate-300 text-sm mb-6 leading-relaxed">This app requires notification permissions to alert you about your scheduled tasks. Please enable notifications in your browser or device settings to continue.</p>
+            <button onclick="window.retryPermission()" class="w-full bg-violet-600 hover:bg-violet-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg active:scale-95">Enable / Retry</button>
+        </div>
+    </div>
+
+    <div id="auth-page" class="fixed inset-0 z-[1100] bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-slate-950 dark:to-violet-950 flex items-center justify-center p-4 transition-colors duration-500">
+        <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl w-full max-w-md p-8 rounded-[40px] shadow-2xl border border-white/40 dark:border-white/10">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-indigo-200">
-                    <i class="fas fa-graduation-cap text-white text-3xl"></i>
+                <div class="w-20 h-20 bg-gradient-to-tr from-violet-600 to-fuchsia-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-violet-500/30 ring-4 ring-white/50 dark:ring-white/10">
+                    <i class="fas fa-hourglass-half text-white text-4xl animate-pulse"></i>
                 </div>
-                <h1 id="auth-title" class="text-3xl font-extrabold tracking-tight">EduPlan Pro</h1>
-                <p class="text-slate-400 mt-2 text-sm">Elevate your study routine</p>
+                <h1 id="auth-title" class="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-fuchsia-500">Manage Your Time.</h1>
+                <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium">Master your schedule, achieve your goals</p>
             </div>
             
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 ring-indigo-500 transition text-sm">
-                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none focus:ring-2 ring-indigo-500 transition text-sm">
-                
-                <button id="auth-btn" onclick="handleAuth()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition">Login</button>
-                
-                <div class="flex flex-col items-center gap-4 mt-2">
-                    <button id="forgot-btn" onclick="forgotPassword()" class="text-[11px] font-bold text-slate-400 hover:text-indigo-600 transition uppercase">
-                        Forgot Password?
-                    </button>
-
-                    <div class="text-xs">
-                        <span id="auth-toggle-text">New to EduPlan?</span>
-                        <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-indigo-600 font-bold ml-1">Create Account</button>
+                <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-2xl border-0 dark:border-white/10 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm outline-none focus:ring-2 ring-violet-500 transition-all text-sm shadow-inner placeholder-slate-400">
+                <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border-0 dark:border-white/10 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm outline-none focus:ring-2 ring-violet-500 transition-all text-sm shadow-inner placeholder-slate-400">
+                <button id="auth-btn" onclick="window.handleAuth()" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-500 hover:to-fuchsia-400 text-white py-4 rounded-2xl font-bold shadow-lg shadow-violet-500/30 active:scale-95 transition-all outline-none">Login</button>
+                <div class="flex flex-col sm:flex-row justify-between items-center text-xs mt-4 gap-3">
+                    <button onclick="window.forgotPassword()" class="text-slate-500 dark:text-slate-400 font-medium hover:text-violet-500 dark:hover:text-violet-400 hover:underline outline-none transition-colors">Forgot Password?</button>
+                    <div>
+                        <span id="auth-toggle-text" class="text-slate-500 dark:text-slate-400">New to the app?</span>
+                        <button onclick="window.toggleAuthMode()" id="auth-toggle-btn" class="text-violet-600 dark:text-violet-400 font-bold ml-1 hover:underline outline-none">Create Account</button>
                     </div>
                 </div>
+                <div class="relative flex py-3 items-center">
+                    <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
+                    <span class="flex-shrink mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">Or</span>
+                    <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
+                </div>
+                <button onclick="window.loginWithGoogle()" class="w-full border border-slate-200 dark:border-slate-700 p-4 rounded-2xl flex items-center justify-center gap-3 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4"> Google Login
+                </button>
             </div>
         </div>
     </div>
 
-    <aside id="sidebar" class="w-72 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+    <!-- Android APK Smart Banner -->
+    <div id="android-apk-banner" class="hidden fixed bottom-4 left-4 right-4 z-[3000] bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-2xl flex items-center justify-between text-white animate-slide-up">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-violet-600 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg"><i class="fab fa-android text-2xl"></i></div>
+            <div>
+                <h4 class="font-bold text-sm">Get the Android App</h4>
+                <p class="text-[10px] text-slate-400">Better features & Notifications</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="Manage-Your-Time.apk" download class="bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-lg transition">Download</a>
+            <button onclick="document.getElementById('android-apk-banner').style.display='none'" class="text-slate-500 hover:text-white p-2 transition"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <aside id="sidebar" class="w-72 bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border-r border-slate-200/50 dark:border-white/5 flex flex-col shrink-0">
         <div class="p-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-layer-group text-white"></i></div>
-                <span class="text-xl font-black">EduPlan</span>
+                <div class="w-12 h-12 bg-gradient-to-br from-violet-600 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/30"><i class="fas fa-calendar-check text-white text-xl"></i></div>
+                <span class="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-fuchsia-500">M.Y.T.</span>
             </div>
-            <button onclick="closeSidebar()" class="lg:hidden text-slate-400"><i class="fas fa-times"></i></button>
+            <button onclick="window.closeSidebar()" class="lg:hidden text-slate-400 hover:text-slate-700 transition"><i class="fas fa-times text-xl"></i></button>
         </div>
-        
-        <nav class="px-6 space-y-1 overflow-y-auto flex-grow">
-            <div onclick="filterBySubject(null); closeSidebar()" class="sub-filter active-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-6" id="all-filter">
-                <i class="fas fa-th-large"></i> All Subjects
+        <nav class="px-6 space-y-2 overflow-y-auto flex-grow">
+            <div onclick="window.showWorkspace(); window.closeSidebar()" class="nav-item bg-violet-600 text-white p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-2 shadow-md hover:scale-[1.02] transition-transform" id="nav-workspace">
+                <i class="fas fa-home"></i> Workspace
+            </div>
+            <div onclick="window.showTimetable(); window.closeSidebar()" class="nav-item bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-6 hover:scale-[1.02] transition-transform" id="nav-timetable">
+                <i class="fas fa-table"></i> Timetable
+            </div>
+
+            <div class="text-xs font-black uppercase text-slate-400 dark:text-slate-500 mb-2 mt-4 ml-2">Categories</div>
+
+            <div onclick="window.filterBySubject(null); window.closeSidebar()" class="sub-filter bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold mb-2 hover:bg-slate-200 dark:hover:bg-slate-700 transition" id="all-filter">
+                <i class="fas fa-layer-group"></i> All Activities
             </div>
             <div id="sidebar-subject-list" class="space-y-1"></div>
         </nav>
-        <div class="px-6 mb-2">
-            <a href="EduPlan Pro.apk" download class="w-full flex items-center gap-4 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-bold hover:bg-indigo-100 transition shadow-sm text-sm">
-                <i class="fas fa-download"></i>
-                <span>Download App</span>
-            </a>
-        </div>
-
-        
         <div class="p-6 border-t border-slate-100 dark:border-slate-800 space-y-2">
-            <button onclick="toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold text-sm"><i id="theme-icon" class="fas fa-moon"></i> Appearance</button>
-            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold text-sm"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+            <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl mb-2 shadow-sm border border-slate-100 dark:border-slate-700/50">
+                <div class="flex items-center gap-3 text-slate-700 dark:text-slate-200">
+                    <i class="fas fa-sync-alt text-violet-500"></i>
+                    <span class="font-bold text-sm tracking-tight">Weekly Loop</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="globalLoopToggle" class="sr-only peer" onchange="window.toggleGlobalLoop()">
+                    <div class="w-9 h-5 bg-slate-300 dark:bg-slate-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-violet-600 shadow-sm"></div>
+                </label>
+            </div>
+            <button onclick="window.toggleDarkMode()" class="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 font-bold text-sm"><i id="theme-icon" class="fas fa-moon"></i> Appearance</button>
+            <button onclick="window.logout()" class="w-full flex items-center gap-4 p-4 text-red-500 font-bold text-sm"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
         </div>
     </aside>
 
     <main id="app-content" class="hidden flex-grow flex flex-col h-screen overflow-y-auto">
         <header class="p-5 lg:p-8 flex justify-between items-center sticky top-0 z-40 bg-bg-light/80 dark:bg-bg-dark/80 backdrop-blur-xl border-b border-transparent">
             <div class="flex items-center gap-4">
-                <button onclick="openSidebar()" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-800">
+                <button onclick="window.openSidebar()" class="lg:hidden p-3 bg-white dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-800">
                     <i class="fas fa-bars-staggered text-indigo-600"></i>
                 </button>
                 <h2 class="text-xl lg:text-2xl font-extrabold tracking-tight" id="main-title">Workspace</h2>
@@ -212,367 +147,57 @@
             <div id="date-display" class="hidden sm:block text-slate-400 font-bold text-xs"></div>
         </header>
 
-        <div class="p-4 lg:p-8 mobile-stack lg:grid lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-4 space-y-8 flex flex-col">
-                <section class="bg-white dark:bg-surface-dark p-7 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-subject lg:order-1">
-                    <h3 class="text-md font-bold mb-5 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-500"></i> New Subject</h3>
+        <div class="p-4 lg:p-8 mobile-stack lg:grid lg:grid-cols-12 gap-8" id="main-grid">
+            <div class="lg:col-span-4 space-y-8 flex flex-col" id="left-panels">
+                <section class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-7 rounded-[35px] border border-white/40 dark:border-white/5 shadow-lg shadow-slate-200/50 dark:shadow-none order-subject transition-all hover:shadow-xl">
+                    <h3 class="text-md font-bold mb-5 flex items-center gap-2 text-slate-800 dark:text-slate-100"><i class="fas fa-folder-plus text-violet-500"></i> New Category</h3>
                     <div class="space-y-4">
-                        <input type="text" id="newSubName" placeholder="Subject Name" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
-                        <div class="flex items-center justify-between px-2">
-                            <span class="text-xs font-bold text-slate-400">Color:</span>
-                            <input type="color" id="newSubColor" value="#6366f1" class="w-10 h-10 cursor-pointer bg-transparent border-none">
+                        <input type="text" id="newSubName" placeholder="Category Name (e.g., Work, Gym)" class="w-full p-4 rounded-2xl border-0 bg-slate-100/50 dark:bg-slate-800/50 outline-none focus:ring-2 ring-violet-500 transition-all text-sm">
+                        <div class="flex items-center justify-between px-3 py-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl">
+                            <span class="text-xs font-bold text-slate-500">Theme Color:</span>
+                            <input type="color" id="newSubColor" value="#8b5cf6" class="w-8 h-8 cursor-pointer bg-transparent border-none rounded-full overflow-hidden">
                         </div>
-                        <button onclick="addSubject()" class="w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition">Save Subject</button>
+                        <button onclick="window.addSubject()" class="w-full bg-slate-900 dark:bg-violet-600 hover:bg-slate-800 dark:hover:bg-violet-500 text-white py-4 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition-all">Save Category</button>
                     </div>
                 </section>
 
-                <section class="bg-white dark:bg-surface-dark p-7 rounded-[35px] border border-slate-100 dark:border-slate-800 shadow-sm order-plan lg:order-2">
-                    <h3 class="text-md font-bold mb-5 flex items-center gap-2"><i class="fas fa-bolt text-amber-500"></i> Quick Plan</h3>
+                <section class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-7 rounded-[35px] border border-white/40 dark:border-white/5 shadow-lg shadow-slate-200/50 dark:shadow-none order-plan transition-all hover:shadow-xl">
+                    <h3 class="text-md font-bold mb-5 flex items-center gap-2 text-slate-800 dark:text-slate-100"><i class="fas fa-bolt text-fuchsia-500"></i> Quick Plan</h3>
                     <div class="space-y-4">
-                        <select id="taskSubject" onchange="applySubjectColor()" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none font-bold text-sm"></select>
-                        <input type="text" id="taskTitle" placeholder="What's the goal?" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
-                        <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                        <select id="taskSubject" onchange="window.applySubjectColor()" class="w-full p-4 rounded-2xl border-0 bg-slate-100/50 dark:bg-slate-800/50 outline-none font-bold text-sm focus:ring-2 ring-violet-500 transition-all cursor-pointer appearance-none"></select>
+                        <input type="text" id="taskTitle" placeholder="What's the goal?" class="w-full p-4 rounded-2xl border-0 bg-slate-100/50 dark:bg-slate-800/50 outline-none text-sm focus:ring-2 ring-violet-500 transition-all">
+                        <input type="date" id="taskDate" class="w-full p-4 rounded-2xl border-0 bg-slate-100/50 dark:bg-slate-800/50 outline-none text-sm focus:ring-2 ring-violet-500 transition-all cursor-pointer">
                         <div class="grid grid-cols-2 gap-3">
-                            <input type="time" id="startTime" class="w-full p-4 rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
-                            <input type="time" id="endTime" class="p-4 w-full rounded-2xl border dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-sm">
+                            <input type="time" id="startTime" class="w-full p-4 rounded-2xl border-0 bg-slate-100/50 dark:bg-slate-800/50 outline-none text-sm focus:ring-2 ring-violet-500 transition-all cursor-pointer">
+                            <input type="time" id="endTime" class="p-4 w-full rounded-2xl border-0 bg-slate-100/50 dark:bg-slate-800/50 outline-none text-sm focus:ring-2 ring-violet-500 transition-all cursor-pointer">
                         </div>
                         <input type="hidden" id="taskColor">
-                        <button onclick="saveTask()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition">Add to Timeline</button>
+                        <button onclick="window.saveTask()" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:opacity-90 text-white py-4 rounded-2xl font-bold text-sm shadow-lg shadow-violet-500/30 active:scale-95 transition-all">Add to Timeline</button>
                     </div>
                 </section>
 
-                <section class="bg-indigo-600 dark:bg-indigo-950 p-7 lg:p-8 rounded-[40px] text-white shadow-2xl min-h-[400px] order-agenda lg:order-3">
+                <section class="bg-gradient-to-br from-violet-600 to-fuchsia-600 p-7 lg:p-8 rounded-[40px] text-white shadow-2xl shadow-violet-500/20 min-h-[400px] order-agenda relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
                     <div class="flex justify-between items-center mb-6">
                         <h3 id="agenda-date-label" class="text-xl font-bold tracking-tight">Agenda</h3>
                         <div class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest" id="selected-day-badge">Today</div>
                     </div>
-                    <div id="daily-tasks-list" class="space-y-4"></div>
+                    <div id="daily-tasks-list" class="space-y-4 relative z-10"></div>
                 </section>
             </div>
 
-            <div class="lg:col-span-8 flex flex-col order-calendar lg:order-2">
-                <section class="bg-white dark:bg-surface-dark p-2 lg:p-6 rounded-[40px] border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
-                    <div id="calendar"></div>
+            <div class="lg:col-span-8 flex flex-col order-calendar" id="right-calendar">
+                <section class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-2 lg:p-6 rounded-[40px] border border-white/40 dark:border-white/5 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden h-full flex flex-col">
+                    <div class="calendar-wrapper flex-grow">
+                        <div class="calendar-inner h-full">
+                            <div id="calendar" class="fc-theme-myt h-full"></div>
+                        </div>
+                    </div>
                 </section>
             </div>
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyALIII2FHy65LTvi4AaC6ulXCd6CCXQ2UM",
-            authDomain: "time-planning-4ef59.firebaseapp.com",
-            projectId: "time-planning-4ef59",
-            storageBucket: "time-planning-4ef59.firebasestorage.app",
-            messagingSenderId: "481313041090",
-            appId: "1:481313041090:web:1292cbf4e51f71748e695b"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        let calendar, allTasks = [], subjects = {}, currentFilter = null, selectedDate = new Date().toISOString().split('T')[0], isSignupMode = false;
-
-        window.toggleAuthMode = () => {
-    isSignupMode = !isSignupMode;
-    const forgotBtn = document.querySelector('[onclick="forgotPassword()"]').parentElement;
-    
-    // Sign up mode එකේදී Forgot Password බටන් එක සඟවන්න
-    forgotBtn.style.display = isSignupMode ? 'none' : 'block';
-    
-    document.getElementById('auth-title').innerText = isSignupMode ? "Create Account" : "EduPlan Pro";
-    document.getElementById('auth-btn').innerText = isSignupMode ? "Sign Up" : "Login";
-    document.getElementById('auth-toggle-btn').innerText = isSignupMode ? "Login" : "Sign Up";
-    document.getElementById('auth-toggle-text').innerText = isSignupMode ? "Already have an account?" : "New to EduPlan?";
-};
-
-
-// Forgot Password function එක
-window.forgotPassword = () => {
-    const email = document.getElementById('email').value;
-    
-    if (!email) {
-        alert("කරුණාකර මුලින්ම ඔබේ Email ලිපිනය ඇතුළත් කරන්න.");
-        return;
-    }
-
-    // Loader එකක් පෙන්වීමට හෝ බටන් එක disable කිරීමට මෙය හොඳයි
-    console.log("Attempting to send reset email to:", email);
-
-    sendPasswordResetEmail(auth, email)
-        .then(() => {
-            alert("සාර්ථකයි! Password reset link එක ඔබේ Email එකට එවා ඇත.");
-        })
-        .catch((error) => {
-            console.error("Firebase Error:", error.code, error.message);
-            
-            // වැරදි පණිවිඩය පැහැදිලිව පෙන්වන්න
-            if (error.code === 'auth/user-not-found') {
-                alert("මෙම Email ලිපිනයෙන් ලියාපදිංචි වූ ගිණුමක් සොයාගත නොහැක.");
-            } else if (error.code === 'auth/invalid-email') {
-                alert("ඇතුළත් කළ Email ලිපිනය දෝෂ සහිතයි.");
-            } else if (error.code === 'auth/too-many-requests') {
-                alert("වැඩි වාර ගණනක් උත්සාහ කර ඇත. කරුණාකර මද වේලාවකින් උත්සාහ කරන්න.");
-            } else {
-                alert("දෝෂයක් සිදු විය: " + error.message);
-            }
-        });
-};
-
-        window.handleAuth = () => {
-            const e = document.getElementById('email').value, p = document.getElementById('password').value;
-            if(!e || !p) return;
-            if(isSignupMode) createUserWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
-            else signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
-        };
-
-        
-        window.logout = () => signOut(auth);
-        window.openSidebar = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); };
-        window.closeSidebar = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); };
-
-        window.addSubject = async () => {
-            const name = document.getElementById('newSubName').value.trim();
-            const color = document.getElementById('newSubColor').value;
-            if(!name) return;
-            await setDoc(doc(db, "users", auth.currentUser.uid, "subjects", name), { name, color });
-            document.getElementById('newSubName').value = "";
-            confetti({ particleCount: 40, spread: 70, origin: { y: 0.8 } });
-        };
-
-        function syncSubjects(uid) {
-            onSnapshot(collection(db, "users", uid, "subjects"), (snap) => {
-                const select = document.getElementById('taskSubject'), sidebar = document.getElementById('sidebar-subject-list');
-                select.innerHTML = '<option value="">Subject</option>';
-                sidebar.innerHTML = '';
-                snap.forEach(doc => {
-                    const sub = doc.data();
-                    subjects[sub.name] = sub.color;
-                    select.innerHTML += `<option value="${sub.name}">${sub.name}</option>`;
-                    sidebar.innerHTML += `<div onclick="filterBySubject('${sub.name}'); closeSidebar()" class="sub-filter p-4 rounded-2xl flex items-center gap-4 cursor-pointer font-bold text-slate-500 text-sm" id="filter-${sub.name}"><span class="w-3 h-3 rounded-full" style="background:${sub.color}"></span> ${sub.name}</div>`;
-                });
-            });
-        }
-
-        // Auth ස්වභාවය වෙනස් වන විට
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        document.getElementById('auth-page').classList.add('hidden');
-        document.getElementById('app-content').classList.remove('hidden');
-        
-        setupDefaults(); 
-        initCalendar(); 
-        syncSubjects(user.uid); 
-        loadTasks(user.uid);
-        
-        // APK එකේ Notification අවසර ඉල්ලීම
-        requestNotificationPermission();
-    } else { 
-        document.getElementById('auth-page').classList.remove('hidden'); 
-        document.getElementById('app-content').classList.add('hidden');
-    }
-});
-
-// විනාඩියකට වරක් වේලාව පරීක්ෂා කිරීම (බැටරි ඉතිරි කිරීමට 1000ms වෙනුවට 60000ms හොඳයි)
-setInterval(() => {
-    const now = new Date();
-    if (now.getHours() === 0 && now.getMinutes() === 0) {
-        setupDefaults(); 
-        updateAgenda();  
-        if (calendar) calendar.today(); 
-    }
-}, 60000);
-
-// Notification අවසර ලබා ගැනීම
-async function requestNotificationPermission() {
-    try {
-        const { LocalNotifications } = await import('https://cdn.jsdelivr.net/npm/@capacitor/local-notifications@latest/dist/esm/index.js');
-        const status = await LocalNotifications.checkPermissions();
-        
-        if (status.display !== 'granted') {
-            await LocalNotifications.requestPermissions();
-        }
-    } catch (e) {
-        console.warn("Capacitor Notifications are only available in the APK/Native app.");
-    }
-}
-
-
-
-		async function scheduleLocalNotification(title, subName, startTimeStr) {
-    try {
-        // Capacitor Notification ප්ලගිනය load කිරීම
-        const { LocalNotifications } = await import('https://cdn.jsdelivr.net/npm/@capacitor/local-notifications@latest/dist/esm/index.js');
-        
-        const scheduleDate = new Date(startTimeStr);
-        const now = new Date();
-
-        // වෙලාව අනාගතයේ එකක් නම් පමණක් schedule කරන්න
-        if (scheduleDate > now) {
-            await LocalNotifications.schedule({
-                notifications: [{
-                    title: `EduPlan: ${subName}`, // විෂයය නම
-                    body: `දැන් වෙලාව හරි: ${title}`, // task එකේ නම
-                    id: Math.floor(Math.random() * 1000000), // අහඹු අංකයක්
-                    schedule: { at: scheduleDate }, // නියමිත වෙලාව
-                    sound: 'default', // standard ශබ්දය
-                    actionTypeId: "",
-                    extra: null
-                }]
-            });
-            console.log("Notification set for: " + startTimeStr);
-        }
-    } catch (e) {
-        // APK එකක් ලෙස නෙවෙයි නම් browser එකේදී console එකේ error එකක් පෙන්වයි
-        console.warn("Notification error (Browser එකේදී මෙය ක්‍රියා නොකරයි):", e);
-    }
-}
-
-		
-        function setupDefaults() {
-    const now = new Date();
-    // UTC වෙනුවට Local Date එක ලබා ගැනීම
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const localDate = `${year}-${month}-${day}`;
-    
-    selectedDate = localDate; // Agenda එකට අද දවස ලබා දීම
-    document.getElementById('taskDate').value = localDate;
-    document.getElementById('startTime').value = now.getHours().toString().padStart(2, '0') + ":00";
-    document.getElementById('endTime').value = (now.getHours() + 1).toString().padStart(2, '0') + ":00";
-    document.getElementById('date-display').innerText = now.toDateString();
-}
-
-        function initCalendar() {
-            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-	timeZone: 'Asia/Colombo',
-        initialView: window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek',
-        headerToolbar: { 
-            // Mobile එකේදී මේ layout එක වඩාත් සුදුසුයි
-            left: 'prev,today,next', 
-            center: 'title', 
-            right: window.innerWidth < 768 ? '' : 'timeGridWeek,timeGridDay' 
-        },
-        buttonText: {
-            today: 'Today',
-            week: 'Week',
-            day: 'Day'
-        },
-        // කාල සීමාව උදේ 5 සිට රෑ 12 දක්වා වැඩි කළා
-        slotMinTime: '00:00:00', 
-        slotMaxTime: '24:00:00',
-        allDaySlot: false,
-        
-        // Mobile එකේදී Table එක දිගට පෙනීමට fixed height එකක් දුන්නා
-        contentHeight: window.innerWidth < 768 ? 800 : 'auto',
-        height: 'auto',
-        
-        nowIndicator: true,
-        selectable: true,
-        stickyHeaderDates: true, // Scroll කරද්දී දවස පෙනෙන්නට
-        handleWindowResize: true,
-        
-        dateClick: info => { 
-            selectedDate = info.dateStr.split('T')[0]; 
-            updateAgenda(); 
-        },
-        eventClick: info => { 
-            selectedDate = info.event.startStr.split('T')[0]; 
-            updateAgenda(); 
-        },
-        eventContent: arg => {
-            let c = document.createElement('div');
-            c.className = "p-1";
-            c.innerHTML = `<div class="text-[10px] font-black opacity-70 uppercase leading-tight">${arg.timeText}</div><div class="text-[11px] font-bold truncate">${arg.event.title}</div>`;
-            return { domNodes: [c] };
-        }
-    });
-    calendar.render();
-}
-
-        window.saveTask = async () => {
-            const title = document.getElementById('taskTitle').value, sub = document.getElementById('taskSubject').value,
-                  date = document.getElementById('taskDate').value, start = document.getElementById('startTime').value,
-                  end = document.getElementById('endTime').value, color = document.getElementById('taskColor').value;
-            if(!title || !date || !sub) return alert("Fill all fields");
-            await addDoc(collection(db, "tasks"), { uid: auth.currentUser.uid, subName: sub, title, date, start: `${date}T${start}`, end: `${date}T${end}`, backgroundColor: color, completed: false });
-            document.getElementById('taskTitle').value = "";
-        };
-
-       function loadTasks(uid) {
-    onSnapshot(query(collection(db, "tasks"), where("uid", "==", uid)), (snap) => {
-        allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        
-        // සෑම task එකක් සඳහාම notification එකක් schedule කිරීම
-        allTasks.forEach(task => {
-            if (task.date && task.start) {
-                // ISO string එකේ (2023-10-25T14:30) T අකුරෙන් පසු කොටස වෙලාවයි
-                const startTime = task.start; 
-                scheduleLocalNotification(task.title, task.subName, startTime);
-            }
-        });
-
-        renderView();
-    });
-}
-
-        function renderView() {
-            let filtered = currentFilter ? allTasks.filter(t => t.subName === currentFilter) : allTasks;
-            calendar.removeAllEvents();
-            calendar.addEventSource(filtered.map(t => ({
-                id: t.id, title: t.subName + ": " + t.title, start: t.start, end: t.end, backgroundColor: t.backgroundColor, textColor: '#fff'
-            })));
-            updateAgenda();
-        }
-
-        function updateAgenda() {
-            const list = document.getElementById('daily-tasks-list');
-            const displayDate = new Date(selectedDate);
-            document.getElementById('agenda-date-label').innerText = displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            document.getElementById('selected-day-badge').innerText = displayDate.toLocaleDateString('en-US', { weekday: 'short' });
-            
-            let dayTasks = allTasks.filter(t => t.date === selectedDate);
-            if(currentFilter) dayTasks = dayTasks.filter(t => t.subName === currentFilter);
-            dayTasks.sort((a,b) => a.start.localeCompare(b.start));
-            
-            list.innerHTML = dayTasks.length ? "" : "<div class='text-center py-10 opacity-30 text-xs italic uppercase tracking-widest'>No Plans Scheduled</div>";
-            dayTasks.forEach(t => {
-                const div = document.createElement('div');
-                div.className = `p-4 rounded-[28px] flex items-center justify-between border-l-[6px] transition-all ${t.completed ? 'bg-indigo-900/30 opacity-60 scale-95' : 'bg-white text-slate-900 shadow-xl'}`;
-                div.style.borderColor = t.backgroundColor;
-                div.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleComplete('${t.id}', ${t.completed})" class="w-5 h-5 accent-green-500 cursor-pointer">
-                        <div>
-                            <p class="font-bold text-sm ${t.completed ? 'line-through opacity-40' : ''}">${t.subName}: ${t.title}</p>
-                            <p class="text-[10px] font-black text-indigo-500">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
-                        </div>
-                    </div>
-                    <button onclick="deleteTask('${t.id}')" class="text-slate-200 hover:text-red-500 transition"><i class="fas fa-trash-alt text-xs"></i></button>`;
-                list.appendChild(div);
-            });
-        }
-
-        window.toggleComplete = async (id, status) => { if(!status) confetti({ particleCount: 100, spread: 60, origin: { y: 0.7 } }); await updateDoc(doc(db, "tasks", id), { completed: !status }); };
-        window.deleteTask = async (id) => { if(confirm("Delete this?")) await deleteDoc(doc(db, "tasks", id)); };
-        window.toggleDarkMode = () => { const isDark = document.documentElement.classList.toggle('dark'); document.getElementById('theme-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon'; };
-        window.filterBySubject = (name) => { currentFilter = name; document.querySelectorAll('.sub-filter, #all-filter').forEach(el => el.classList.remove('active-filter')); if(name) { document.getElementById(`filter-${name}`).classList.add('active-filter'); document.getElementById('main-title').innerText = name; } else { document.getElementById('all-filter').classList.add('active-filter'); document.getElementById('main-title').innerText = "Workspace"; } renderView(); };
-        window.applySubjectColor = () => { const sub = document.getElementById('taskSubject').value; document.getElementById('taskColor').value = subjects[sub] || "#6366f1"; };
-    </script>
+    <script type="module" src="script.js"></script>
 </body>
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/EduPlan/sw.js')
-        .then(reg => console.log('Service Worker Registered'))
-        .catch(err => console.log('Service Worker Error', err));
-    });
-  }
-</script>
 </html>

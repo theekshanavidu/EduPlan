@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    transition: background-color 0.5s ease, color 0.5s ease; 
+    -webkit-tap-highlight-color: transparent; 
+}
+
+/* Premium Custom Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.dark ::-webkit-scrollbar-thumb { background: #334155; }
+::-webkit-scrollbar-thumb:hover { background: #8b5cf6; }
+
+/* FullCalendar Modernization */
+.fc { 
+    --fc-border-color: rgba(139, 92, 246, 0.15); 
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: transparent;
+    --fc-button-bg-color: transparent; 
+    --fc-button-border-color: #e2e8f0; 
+    --fc-button-text-color: #64748b; 
+    --fc-button-hover-bg-color: #f1f5f9; 
+    --fc-button-hover-border-color: #e2e8f0; 
+    --fc-button-active-bg-color: #8b5cf6; 
+    --fc-button-active-border-color: #8b5cf6; 
+    --fc-today-bg-color: rgba(139, 92, 246, 0.08); 
+}
+.dark .fc { 
+    --fc-border-color: rgba(255, 255, 255, 0.08); 
+    --fc-button-border-color: #334155; 
+    --fc-button-text-color: #94a3b8; 
+    --fc-button-hover-bg-color: #1e293b; 
+    --fc-button-hover-border-color: #334155; 
+    --fc-today-bg-color: rgba(139, 92, 246, 0.15); 
+}
+
+/* Scrollable Calendar Container for Mobile */
+.calendar-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 20px;
+}
+.calendar-inner {
+    min-width: 700px; /* Forces sideways scroll on small screens to keep it clear (පැහැදිලිව) */
+}
+
+.fc-v-event { 
+    border-radius: 10px !important; 
+    border: 1px solid rgba(255,255,255,0.3) !important; 
+    padding: 4px !important; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+    transition: transform 0.2s, box-shadow 0.2s; 
+    backdrop-filter: blur(8px); 
+}
+.fc-v-event:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15); 
+    z-index: 5 !important; 
+}
+.fc-event-title { font-weight: 700 !important; font-size: 0.75rem !important; letter-spacing: -0.01em; }
+.fc-timegrid-slot { height: 3.5em; }
+.timetable-mode .fc-timegrid-slot { height: 2em; }
+.timetable-mode .calendar-inner { min-width: 0 !important; }
+.timetable-mode #right-calendar { min-height: calc(100vh - 160px); }
+.fc-col-header-cell-cushion { padding: 10px !important; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; }
+.fc .fc-toolbar-title { font-weight: 800; font-size: 1.25rem !important; }
+.fc .fc-button { border-radius: 12px !important; font-weight: 600 !important; text-transform: capitalize; padding: 0.5rem 1rem !important; transition: all 0.3s ease; }
+.fc .fc-button-primary:not(:disabled).fc-button-active { color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+
+/* Completed Events */
+.event-completed {
+    opacity: 0.6;
+    text-decoration: line-through;
+    filter: grayscale(80%);
+}
+
+@media (max-width: 1024px) {
+    #sidebar { 
+        position: fixed; left: -110%; z-index: 1000; 
+        transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
+        height: 100vh; width: 85%; max-width: 320px;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+    }
+    #sidebar.open { left: 0; }
+    #sidebar-overlay.show { 
+        display: block; position: fixed; inset: 0; 
+        background: rgba(2, 6, 23, 0.6); z-index: 900; 
+        backdrop-filter: blur(8px); animation: fadeIn 0.3s; 
+    }
+    .mobile-stack { display: flex; flex-direction: column; gap: 1.5rem; }
+    #calendar { height: 550px !important; }
+    .timetable-mode #calendar { height: calc(100vh - 120px) !important; }
+    input, select, button { font-size: 16px !important; }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+#sidebar-overlay { display: none; }
