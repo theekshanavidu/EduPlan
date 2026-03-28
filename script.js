@@ -53,11 +53,8 @@ async function requestNotificationPermission() {
                 notificationPermissionGranted = true;
             }
         } else {
-            if ('Notification' in window) {
-                let perm = Notification.permission;
-                if (perm === 'default') perm = await Notification.requestPermission();
-                if (perm === 'granted') notificationPermissionGranted = true;
-            }
+            // On web, notifications are no longer required
+            notificationPermissionGranted = true;
         }
     } catch (e) {
         console.error("Permission request failed", e);
