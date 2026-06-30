@@ -280,6 +280,7 @@ window.saveTask = async () => {
     const start = document.getElementById('startTime').value;
     const end = document.getElementById('endTime').value;
     const color = document.getElementById('taskColor').value;
+    const reminderEnabled = document.getElementById('taskReminder').checked;
     
     if(!title || !date || !sub || !start || !end) return alert("Please fill all required fields.");
     
@@ -294,11 +295,15 @@ window.saveTask = async () => {
         start: startFull, 
         end: endFull, 
         backgroundColor: color, 
-        completed: false
+        completed: false,
+        reminderEnabled: reminderEnabled
     });
     
-    scheduleLocalNotification(title, sub, startFull);
+    if (reminderEnabled) {
+        scheduleLocalNotification(title, sub, startFull);
+    }
     document.getElementById('taskTitle').value = "";
+    document.getElementById('taskReminder').checked = true;
     confetti({ particleCount: 30, spread: 50, origin: { y: 0.9 } });
 };
 
@@ -327,11 +332,16 @@ function syncSubjects(uid) {
     });
 }
 
+window.toggleReminder = async (id, currentStatus) => {
+    await updateDoc(doc(db, "tasks", id), { reminderEnabled: !currentStatus });
+};
+
 function loadTasks(uid) {
     onSnapshot(query(collection(db, "tasks"), where("uid", "==", uid)), (snap) => {
         allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         allTasks.forEach(t => { 
-            if(!t.completed) scheduleLocalNotification(t.title, t.subName, t.start); 
+            const isReminderOn = t.reminderEnabled !== false; // default true for old docs
+            if(!t.completed && isReminderOn) scheduleLocalNotification(t.title, t.subName, t.start); 
         });
         renderView();
     });
@@ -421,6 +431,7 @@ function updateAgenda() {
         div.className = `p-4 flex flex-col gap-3 rounded-[28px] border-l-[6px] transition-all hover:scale-[1.02] ${t.completed ? 'bg-slate-800/50 backdrop-blur opacity-70' : 'bg-white text-slate-900 shadow-xl'}`;
         div.style.borderColor = t.completed ? "#94a3b8" : t.backgroundColor;
         
+        const isReminderOn = t.reminderEnabled !== false;
         div.innerHTML = `
             <div class="flex items-center justify-between w-full">
                 <div class="flex items-center gap-4">
@@ -430,7 +441,12 @@ function updateAgenda() {
                         <p class="text-[11px] font-black text-violet-500">${t.start.split('T')[1]} - ${t.end.split('T')[1]}</p>
                     </div>
                 </div>
-                <button onclick="window.deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 p-2"><i class="fas fa-trash-alt text-sm"></i></button>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.toggleReminder('${t.id}', ${isReminderOn})" class="p-2 transition-all ${isReminderOn ? 'text-violet-500' : 'text-slate-300'}" title="${isReminderOn ? 'Reminder ON' : 'Reminder OFF'}">
+                        <i class="fas ${isReminderOn ? 'fa-bell' : 'fa-bell-slash'} text-sm"></i>
+                    </button>
+                    <button onclick="window.deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 p-2"><i class="fas fa-trash-alt text-sm"></i></button>
+                </div>
             </div>
         `;
         list.appendChild(div);
